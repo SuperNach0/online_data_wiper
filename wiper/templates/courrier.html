@@ -31,7 +31,7 @@
     <button type="button" class="secondaire" id="copier">Copier le texte</button>
     <button name="action" value="marquer" class="secondaire">{{ 'Noter la plainte comme déposée' if type_courrier == 'plainte_cnil' else "Noter comme envoyé" }}</button>
   </div>
-  {% if not smtp and type_courrier != 'plainte_cnil' %}<small>Pour envoyer directement depuis l'appli, configure le SMTP (voir le README). Sinon, ouvre le courrier dans ta messagerie puis clique « Noter comme envoyé ».</small>{% endif %}
+  {% if not smtp and type_courrier != 'plainte_cnil' %}<small>Pour envoyer directement depuis l'appli, renseigne ton e-mail dans les <a href="{{ url_for('wiper.reglages') }}">Réglages</a>. Sinon, ouvre le courrier dans ta messagerie puis clique « Noter comme envoyé ».</small>{% endif %}
 </form>
 <script>
 (function () {

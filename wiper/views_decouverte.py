@@ -13,7 +13,8 @@ CAT_COMPTE = "Compte en ligne"
 
 
 def hibp_cle():
-    return os.environ.get("WIPER_HIBP_API_KEY")
+    from .views_reglages import cle_hibp
+    return cle_hibp()
 
 
 def domaines_suivis(db):
