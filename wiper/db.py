@@ -33,6 +33,20 @@ CREATE TABLE IF NOT EXISTS cible (
     maj TEXT NOT NULL,
     personnalisee INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS profil (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    prenom TEXT, nom TEXT, emails TEXT, adresse TEXT,
+    date_naissance TEXT, telephone TEXT, pseudos TEXT
+);
+INSERT OR IGNORE INTO profil (id) VALUES (1);
+CREATE TABLE IF NOT EXISTS decouverte_mail (
+    domaine TEXT PRIMARY KEY,
+    nb INTEGER NOT NULL,
+    premier TEXT, dernier TEXT,
+    compte INTEGER NOT NULL DEFAULT 0,
+    newsletter INTEGER NOT NULL DEFAULT 0,
+    objet TEXT
+);
 CREATE TABLE IF NOT EXISTS evenement (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cible_id INTEGER NOT NULL REFERENCES cible(id) ON DELETE CASCADE,
@@ -83,9 +97,46 @@ def charger_seed(db):
     return ajoutees
 
 
+def _slugify(texte):
+    import re
+    import unicodedata
+    t = unicodedata.normalize("NFKD", texte).encode("ascii", "ignore").decode()
+    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-") or "cible"
+
+
+def ajouter_cible(db, nom, categorie, site=None, optout_url=None, contact_rgpd=None, notes=None, slug=None):
+    """Ajoute une cible personnalisée et renvoie son id. Si `slug` est imposé et existe déjà, renvoie l'existante."""
+    if slug:
+        existante = db.execute("SELECT id FROM cible WHERE slug = ?", (slug,)).fetchone()
+        if existante:
+            return existante["id"]
+    else:
+        base = slug = "perso-" + _slugify(nom)
+        i = 2
+        while db.execute("SELECT 1 FROM cible WHERE slug = ?", (slug,)).fetchone():
+            slug, i = f"{base}-{i}", i + 1
+    cur = db.execute(
+        """INSERT INTO cible (slug, nom, categorie, site, optout_url, contact_rgpd, notes, maj, personnalisee)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
+        (slug, nom, categorie, site, optout_url, contact_rgpd, notes, maintenant()),
+    )
+    return cur.lastrowid
+
+
+def migrer(db):
+    """Ajoute les colonnes apparues après la première version, sans perdre de données."""
+    colonnes = {r["name"] for r in db.execute("PRAGMA table_info(cible)")}
+    if "date_relance" not in colonnes:
+        db.execute("ALTER TABLE cible ADD COLUMN date_relance TEXT")
+    if "contenu" not in {r["name"] for r in db.execute("PRAGMA table_info(evenement)")}:
+        db.execute("ALTER TABLE evenement ADD COLUMN contenu TEXT")
+    db.commit()
+
+
 def init_db():
     db = get_db()
     db.executescript(SCHEMA)
+    migrer(db)
     return charger_seed(db)
 
 
@@ -96,8 +147,34 @@ def init_db_command():
     click.echo(f"Base prête. {n} nouvelle(s) cible(s) ajoutée(s).")
 
 
+@click.command("analyser-mbox")
+@click.argument("chemin", type=click.Path(exists=True, dir_okay=False))
+def analyser_mbox_command(chemin):
+    """Analyse un export .mbox (Google Takeout…) sans passer par le navigateur."""
+    from .decouverte import analyser_mbox
+    db = get_db()
+    total, stats = analyser_mbox(chemin, mes_emails(db))
+    enregistrer_analyse_mail(db, stats)
+    click.echo(f"{total} e-mails lus, {len(stats)} expéditeurs trouvés. Résultats dans l'onglet Découverte.")
+
+
+def mes_emails(db):
+    p = db.execute("SELECT emails FROM profil WHERE id = 1").fetchone()
+    return [e.strip() for e in ((p and p["emails"]) or "").splitlines() if e.strip()]
+
+
+def enregistrer_analyse_mail(db, stats):
+    db.execute("DELETE FROM decouverte_mail")
+    db.executemany(
+        "INSERT INTO decouverte_mail (domaine, nb, premier, dernier, compte, newsletter, objet) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [(d, s["nb"], s["premier"], s["dernier"], s["compte"], s["newsletter"], s["objet"]) for d, s in stats.items()],
+    )
+    db.commit()
+
+
 def init_app(app):
     app.teardown_appcontext(close_db)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(analyser_mbox_command)
     with app.app_context():
         init_db()

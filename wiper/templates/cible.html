@@ -2,7 +2,8 @@
 {% block titre %}{{ c.nom }}{% endblock %}
 {% block contenu %}
 <p><a href="{{ url_for('wiper.index') }}">← Retour</a></p>
-<h1>{{ c.nom }} <span class="badge s-{{ c.statut }}">{{ STATUTS[c.statut] }}</span>{% if a_relancer(c) %} <span class="badge s-relance">À relancer</span>{% endif %}</h1>
+<h1>{{ c.nom }} <span class="badge s-{{ c.statut }}">{{ STATUTS[c.statut] }}</span>{% if a_relancer(c) %} <span class="badge s-relance">À relancer</span>{% endif %}{% if cnil_possible(c) %} <span class="badge s-cnil">Plainte CNIL possible</span>{% endif %}</h1>
+<p><a class="bouton" href="{{ url_for('wiper.courrier', cible_id=c.id) }}">Rédiger le courrier</a></p>
 <dl>
   <dt>Catégorie</dt><dd>{{ c.categorie }}{% if c.pays %} · {{ c.pays }}{% endif %}</dd>
   {% if c.site %}<dt>Site</dt><dd><a href="{{ c.site }}" target="_blank" rel="noopener noreferrer">{{ c.site }}</a></dd>{% endif %}
@@ -10,6 +11,7 @@
   {% if c.contact_rgpd %}<dt>Contact RGPD</dt><dd>{{ c.contact_rgpd }}</dd>{% endif %}
   {% if c.methode %}<dt>Méthode</dt><dd>{{ c.methode }}</dd>{% endif %}
   {% if c.date_envoi %}<dt>Demande envoyée le</dt><dd>{{ c.date_envoi[:10] }}</dd>{% endif %}
+  {% if c.date_relance %}<dt>Relancé le</dt><dd>{{ c.date_relance[:10] }}</dd>{% endif %}
   {% if c.notes %}<dt>Notes</dt><dd>{{ c.notes }}</dd>{% endif %}
 </dl>
 
@@ -27,7 +29,8 @@
 {% for e in evenements %}
   <li><time>{{ e.date[:16].replace('T', ' ') }}</time>
     {% if e.statut %}<span class="badge s-{{ e.statut }}">{{ STATUTS[e.statut] }}</span>{% endif %}
-    {% if e.note %}<p>{{ e.note }}</p>{% endif %}</li>
+    {% if e.note %}<p>{{ e.note }}</p>{% endif %}
+    {% if e.contenu %}<details><summary>Voir le courrier</summary><pre>{{ e.contenu }}</pre></details>{% endif %}</li>
 {% else %}
   <li>Aucune action pour l'instant.</li>
 {% endfor %}

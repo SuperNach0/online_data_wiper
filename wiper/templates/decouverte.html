@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block titre %}Découverte{% endblock %}
+{% block contenu %}
+<h1>Où est-ce que j'apparais ?</h1>
+<p class="aide">Trois pistes pour trouver les sites qui ont tes données. Tout ce que tu trouves peut être ajouté au tableau de bord pour être suivi.</p>
+{% if not emails %}<p class="flash">Remplis <a href="{{ url_for('wiper.profil') }}">ton profil</a> (e-mails, pseudos) pour activer la découverte.</p>{% endif %}
+
+<section class="bloc" id="fuites">
+  <h2>1. Fuites de données</h2>
+  {% if hibp %}
+    <form method="post" action="{{ url_for('wiper.verifier_fuites') }}">
+      <button {{ 'disabled' if not emails }}>Vérifier mes {{ emails|length }} adresse(s) sur Have I Been Pwned</button>
+      {% if emails|length > 1 %}<small>Environ {{ ((emails|length - 1) * 6.5)|round|int }} s d'attente : l'API limite le nombre de requêtes.</small>{% endif %}
+    </form>
+  {% else %}
+    <p class="aide">La vérification automatique demande une clé API Have I Been Pwned (abonnement payant, voir le README). En attendant, vérifie chaque adresse à la main :</p>
+    <ul>{% for e in emails %}<li><a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer">haveibeenpwned.com</a> : {{ e }}</li>{% endfor %}</ul>
+    <p class="aide">Pour chaque fuite trouvée, ajoute le site via « + Ajouter un site » avec la catégorie « Fuite de données ».</p>
+  {% endif %}
+  {% if fuites %}
+  <ul class="liste">
+    {% for f in fuites %}<li><a href="{{ url_for('wiper.cible', cible_id=f.id) }}">{{ f.nom }}</a> <span class="badge s-{{ f.statut }}">{{ STATUTS[f.statut] }}</span></li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<section class="bloc" id="recherche">
+  <h2>2. Recherche par nom, e-mail et pseudo</h2>
+  {% if not recherches %}<p class="aide">Ajoute ton nom, tes e-mails et tes pseudos dans ton profil.</p>{% endif %}
+  {% for r in recherches %}
+    <p><strong>{{ r.requete }}</strong> :
+      {% for moteur, url in r.liens.items() %}<a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ moteur }}</a>{{ ' · ' if not loop.last }}{% endfor %}</p>
+  {% endfor %}
+  {% if profils %}
+    <h3>Profils possibles</h3>
+    <p class="aide">Ouvre chaque lien : si la page existe et que c'est toi, ajoute-la au suivi. Si ce n'est pas toi, ignore-la.</p>
+    {% for pr in profils %}
+      <details open><summary>@{{ pr.pseudo }}</summary>
+      <ul class="profils">
+        {% for site, url in pr.liens.items() %}
+        <li><a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ site }}</a>
+          <a class="petit" href="{{ url_for('wiper.ajouter', nom=site ~ ' (@' ~ pr.pseudo ~ ')', site=url, categorie='Réseau social') }}">+ suivre</a></li>
+        {% endfor %}
+      </ul></details>
+    {% endfor %}
+  {% endif %}
+</section>
+
+<section class="bloc" id="mail">
+  <h2>3. Comptes oubliés dans ta boîte mail</h2>
+  <p class="aide">Exporte ta boîte au format .mbox (Gmail : <a href="https://takeout.google.com" target="_blank" rel="noopener noreferrer">Google Takeout</a> → « Mail » ; Thunderbird : extension ImportExportTools). Seuls les en-têtes sont lus (expéditeur, date, objet), et le fichier est supprimé juste après l'analyse. Pour un très gros fichier, utilise plutôt la commande indiquée dans le README.</p>
+  <form method="post" action="{{ url_for('wiper.analyser_mbox') }}" enctype="multipart/form-data" class="filtres">
+    <input type="file" name="mbox" accept=".mbox,application/mbox">
+    <button>Analyser</button>
+  </form>
+  {% if nb_domaines %}
+    <p>{{ nb_domaines }} expéditeurs trouvés.
+      {% if filtre_mail == 'comptes' %}Affichés : ceux qui ressemblent à une création de compte. <a href="{{ url_for('wiper.decouverte_page', mail='tous') }}#mail">Tout afficher</a>
+      {% else %}<a href="{{ url_for('wiper.decouverte_page') }}#mail">Seulement les comptes probables</a>{% endif %}</p>
+    <form method="post" action="{{ url_for('wiper.ajouter_domaines') }}">
+      <div class="table-wrap"><table>
+        <thead><tr><th></th><th>Domaine</th><th>E-mails</th><th>Période</th><th>Indices</th></tr></thead>
+        <tbody>
+        {% for d in domaines %}
+          <tr>
+            <td>{% if d.domaine in suivis %}✓{% else %}<input type="checkbox" name="domaine" value="{{ d.domaine }}" aria-label="Suivre {{ d.domaine }}">{% endif %}</td>
+            <td>{{ d.domaine }}{% if d.objet %}<small>« {{ d.objet }} »</small>{% endif %}</td>
+            <td>{{ d.nb }}</td>
+            <td>{{ d.premier or '?' }} → {{ d.dernier or '?' }}</td>
+            <td>{% if d.compte %}<span class="badge s-envoyee">compte ×{{ d.compte }}</span>{% endif %}
+                {% if d.newsletter %}<span class="badge s-a_contacter">newsletter</span>{% endif %}</td>
+          </tr>
+        {% else %}<tr><td colspan="5">Rien à afficher avec ce filtre.</td></tr>{% endfor %}
+        </tbody>
+      </table></div>
+      <p><button>Ajouter la sélection au suivi</button></p>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

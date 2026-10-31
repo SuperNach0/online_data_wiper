@@ -1,20 +1,7 @@
 import json
 from datetime import datetime, timedelta, timezone
 
-import pytest
-
-from wiper import create_app
 from wiper.db import SEED_FILE, get_db, init_db
-
-
-@pytest.fixture
-def app(tmp_path):
-    return create_app({"TESTING": True, "DATABASE": str(tmp_path / "test.sqlite3")})
-
-
-@pytest.fixture
-def client(app):
-    return app.test_client()
 
 
 def nb_seed():

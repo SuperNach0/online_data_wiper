@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titre %}Mon profil{% endblock %}
+{% block contenu %}
+<h1>Mon profil</h1>
+<p class="aide">Ces informations servent uniquement à remplir tes courriers RGPD et tes recherches. Elles restent sur cet ordinateur. Ne mets que ce qu'il faut pour qu'un organisme te retrouve : nom et e-mails suffisent souvent.</p>
+<form method="post" class="ajout">
+  <label>Prénom<input name="prenom" value="{{ p.prenom or '' }}"></label>
+  <label>Nom *<input name="nom" value="{{ p.nom or '' }}"></label>
+  <label>Adresses e-mail * <small>une par ligne, y compris les anciennes</small><textarea name="emails" rows="3">{{ p.emails or '' }}</textarea></label>
+  <label>Adresse postale<textarea name="adresse" rows="2">{{ p.adresse or '' }}</textarea></label>
+  <label>Téléphone<input name="telephone" value="{{ p.telephone or '' }}"></label>
+  <label>Date de naissance <small>seulement si un organisme l'exige pour t'identifier</small><input name="date_naissance" value="{{ p.date_naissance or '' }}" placeholder="JJ/MM/AAAA"></label>
+  <label>Pseudos <small>un par ligne, pour la recherche de comptes</small><textarea name="pseudos" rows="3">{{ p.pseudos or '' }}</textarea></label>
+  <button>Enregistrer</button>
+</form>
+{% endblock %}
