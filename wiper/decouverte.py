@@ -147,42 +147,55 @@ def _decode(valeur):
         return str(valeur)
 
 
+class Agregateur:
+    """Regroupe des en-têtes d'e-mails par domaine d'expéditeur."""
+
+    def __init__(self, mes_emails=()):
+        self.mes_domaines = {e.split("@")[-1].lower() for e in mes_emails}
+        self.total = 0
+        self.stats = defaultdict(
+            lambda: {"nb": 0, "premier": None, "dernier": None, "compte": 0, "newsletter": 0, "objet": ""}
+        )
+
+    def ajouter(self, h):
+        self.total += 1
+        adresses = getaddresses([_decode(h.get("From"))])
+        if not adresses or "@" not in adresses[0][1]:
+            return
+        dom_complet = adresses[0][1].split("@")[-1].lower().strip(">")
+        if dom_complet in FOURNISSEURS_PERSO or dom_complet in self.mes_domaines:
+            return
+        s = self.stats[domaine_principal(dom_complet)]
+        s["nb"] += 1
+        try:
+            d = parsedate_to_datetime(h.get("Date")).date().isoformat()
+            s["premier"] = min(filter(None, [s["premier"], d]))
+            s["dernier"] = max(filter(None, [s["dernier"], d]))
+        except Exception:  # noqa: BLE001
+            pass
+        objet = _decode(h.get("Subject"))
+        if MOTS_COMPTE.search(objet):
+            s["compte"] += 1
+            if not s["objet"]:
+                s["objet"] = objet[:140]
+        if h.get("List-Unsubscribe"):
+            s["newsletter"] += 1
+        if not s["objet"]:
+            s["objet"] = objet[:140]
+
+    def resultat(self):
+        return self.total, dict(self.stats)
+
+
 def analyser_mbox(chemin, mes_emails=()):
     """Regroupe les expéditeurs par domaine. Ne lit que les en-têtes, rien n'est conservé d'autre."""
-    mes_domaines = {e.split("@")[-1].lower() for e in mes_emails}
-    stats = defaultdict(lambda: {"nb": 0, "premier": None, "dernier": None, "compte": 0, "newsletter": 0, "objet": ""})
+    agg = Agregateur(mes_emails)
     parser = BytesHeaderParser()
     mb = mailbox.mbox(chemin, create=False)
-    total = 0
     try:
         for key in mb.iterkeys():
             with mb.get_file(key) as f:
-                h = parser.parse(f, headersonly=True)
-            total += 1
-            adresses = getaddresses([_decode(h.get("From"))])
-            if not adresses or "@" not in adresses[0][1]:
-                continue
-            dom_complet = adresses[0][1].split("@")[-1].lower().strip(">")
-            if dom_complet in FOURNISSEURS_PERSO or dom_complet in mes_domaines:
-                continue
-            dom = domaine_principal(dom_complet)
-            s = stats[dom]
-            s["nb"] += 1
-            try:
-                d = parsedate_to_datetime(h.get("Date")).date().isoformat()
-                s["premier"] = min(filter(None, [s["premier"], d]))
-                s["dernier"] = max(filter(None, [s["dernier"], d]))
-            except Exception:  # noqa: BLE001
-                pass
-            objet = _decode(h.get("Subject"))
-            if MOTS_COMPTE.search(objet):
-                s["compte"] += 1
-                if not s["objet"]:
-                    s["objet"] = objet[:140]
-            if h.get("List-Unsubscribe"):
-                s["newsletter"] += 1
-            if not s["objet"]:
-                s["objet"] = objet[:140]
+                agg.ajouter(parser.parse(f, headersonly=True))
     finally:
         mb.close()
-    return total, dict(stats)
+    return agg.resultat()

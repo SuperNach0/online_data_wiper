@@ -2,7 +2,7 @@ import os
 
 from flask import flash, redirect, render_template, request, url_for
 
-from . import mailer
+from . import boite, mailer
 from .db import ecrire_reglages, get_db, lire_reglages
 from .views import bp
 
@@ -23,6 +23,7 @@ def reglages():
             "smtp_user": user,
             "smtp_host": request.form.get("smtp_host", "").strip(),
             "smtp_port": request.form.get("smtp_port", "").strip(),
+            "imap_host": request.form.get("imap_host", "").strip(),
         }
         mdp = request.form.get("smtp_password", "").replace(" ", "")
         if mdp:
@@ -37,11 +38,13 @@ def reglages():
             flash("Je ne connais pas le serveur d'envoi de cette adresse : renseigne-le dans « Réglages avancés ».")
         else:
             flash("Réglages enregistrés.")
+            if user:
+                return redirect(url_for("wiper.pilote"))
         return redirect(url_for("wiper.reglages"))
 
     return render_template(
         "reglages.html", r=r, smtp=mailer.config(), serveur_auto=mailer.serveur_pour(r.get("smtp_user")),
-        hibp=bool(cle_hibp()), env_smtp=bool(os.environ.get("WIPER_SMTP_HOST")),
+        hibp=bool(cle_hibp()), env_smtp=bool(os.environ.get("WIPER_SMTP_HOST")), imap=boite.config(),
     )
 
 
