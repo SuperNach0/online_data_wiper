@@ -14,12 +14,13 @@
       <a href="{{ url_for('wiper.decouverte_page') }}">Découverte</a>
       <a href="{{ url_for('wiper.profil') }}">Mon profil</a>
       <a href="{{ url_for('wiper.ajouter') }}">+ Ajouter un site</a>
+      <a href="{{ url_for('wiper.reglages') }}">Réglages</a>
     </nav>
   </header>
   <main>
     {% for m in get_flashed_messages() %}<p class="flash">{{ m }}</p>{% endfor %}
     {% block contenu %}{% endblock %}
   </main>
-  <footer>Données stockées uniquement sur cet ordinateur (dossier <code>instance/</code>).</footer>
+  <footer>Données stockées uniquement sur cet ordinateur.</footer>
 </body>
 </html>

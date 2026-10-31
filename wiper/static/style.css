@@ -61,3 +61,6 @@ pre { white-space: pre-wrap; font: 13px/1.5 ui-monospace, monospace; background:
 .petit { font-size: 12px; margin-left: 6px; }
 .liste { padding-left: 18px; } .liste li { margin: 4px 0; }
 button[disabled] { opacity: .5; cursor: not-allowed; }
+label.case { flex-direction: row !important; align-items: center; gap: 8px; }
+details summary { cursor: pointer; color: var(--muted); }
+details label { margin-top: 8px; }

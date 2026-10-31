@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titre %}Réglages{% endblock %}
+{% block contenu %}
+<h1>Réglages</h1>
+<p class="aide">Tout est facultatif. Sans réglage, les courriers s'ouvrent dans ta messagerie habituelle et les fuites se vérifient à la main.</p>
+
+<section class="bloc">
+<h2>Envoyer les courriers depuis l'appli</h2>
+{% if env_smtp %}<p class="flash">L'envoi est réglé par des variables d'environnement, qui passent avant cette page.</p>{% endif %}
+<p>Statut : {% if smtp %}<span class="badge s-supprime">prêt</span> envoi depuis {{ smtp.from }}{% else %}<span class="badge s-a_contacter">non configuré</span>{% endif %}</p>
+<form method="post" class="ajout">
+  <label>Ton adresse e-mail<input name="smtp_user" type="email" value="{{ r.get('smtp_user', '') }}" placeholder="toi@gmail.com"></label>
+  <label>Mot de passe d'application
+    <small>Pas ton mot de passe habituel : un code créé exprès. Gmail : <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">myaccount.google.com/apppasswords</a> (la validation en deux étapes doit être active). {% if r.get('smtp_password') %}Un mot de passe est déjà enregistré : laisse vide pour le garder.{% endif %}</small>
+    <input name="smtp_password" type="password" autocomplete="new-password" placeholder="{{ '••••••••' if r.get('smtp_password') else 'abcd efgh ijkl mnop' }}"></label>
+  <details {{ 'open' if r.get('smtp_host') or (r.get('smtp_user') and not serveur_auto) }}>
+    <summary>Réglages avancés {% if serveur_auto %}(serveur détecté : {{ serveur_auto[0] }}){% endif %}</summary>
+    <label>Serveur SMTP<input name="smtp_host" value="{{ r.get('smtp_host', '') }}" placeholder="détecté automatiquement"></label>
+    <label>Port<input name="smtp_port" value="{{ r.get('smtp_port', '') }}" placeholder="587 ou 465"></label>
+  </details>
+
+  <h2>Vérification automatique des fuites</h2>
+  <label>Clé API Have I Been Pwned
+    <small>Payante, sur <a href="https://haveibeenpwned.com/API/Key" target="_blank" rel="noopener noreferrer">haveibeenpwned.com/API/Key</a>. {% if hibp %}Une clé est enregistrée.{% endif %}</small>
+    <input name="hibp_cle" type="password" autocomplete="off" placeholder="{{ '••••••••' if hibp else '' }}"></label>
+  {% if hibp %}<label class="case"><input type="checkbox" name="hibp_effacer" value="1"> Supprimer la clé enregistrée</label>{% endif %}
+  <button>Enregistrer</button>
+</form>
+{% if smtp %}
+<form method="post" action="{{ url_for('wiper.tester_envoi') }}"><button class="secondaire">M'envoyer un e-mail de test</button></form>
+{% endif %}
+</section>
+<p class="aide">Ces réglages sont stockés sur cet ordinateur uniquement, dans le même fichier que tes données.</p>
+{% endblock %}

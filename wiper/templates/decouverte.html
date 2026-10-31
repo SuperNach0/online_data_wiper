@@ -13,7 +13,7 @@
       {% if emails|length > 1 %}<small>Environ {{ ((emails|length - 1) * 6.5)|round|int }} s d'attente : l'API limite le nombre de requêtes.</small>{% endif %}
     </form>
   {% else %}
-    <p class="aide">La vérification automatique demande une clé API Have I Been Pwned (abonnement payant, voir le README). En attendant, vérifie chaque adresse à la main :</p>
+    <p class="aide">La vérification automatique demande une clé API Have I Been Pwned (abonnement payant, à saisir dans les <a href="{{ url_for('wiper.reglages') }}">Réglages</a>). En attendant, vérifie chaque adresse à la main :</p>
     <ul>{% for e in emails %}<li><a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer">haveibeenpwned.com</a> : {{ e }}</li>{% endfor %}</ul>
     <p class="aide">Pour chaque fuite trouvée, ajoute le site via « + Ajouter un site » avec la catégorie « Fuite de données ».</p>
   {% endif %}
@@ -48,7 +48,7 @@
 
 <section class="bloc" id="mail">
   <h2>3. Comptes oubliés dans ta boîte mail</h2>
-  <p class="aide">Exporte ta boîte au format .mbox (Gmail : <a href="https://takeout.google.com" target="_blank" rel="noopener noreferrer">Google Takeout</a> → « Mail » ; Thunderbird : extension ImportExportTools). Seuls les en-têtes sont lus (expéditeur, date, objet), et le fichier est supprimé juste après l'analyse. Pour un très gros fichier, utilise plutôt la commande indiquée dans le README.</p>
+  <p class="aide">Exporte ta boîte au format .mbox (Gmail : <a href="https://takeout.google.com" target="_blank" rel="noopener noreferrer">Google Takeout</a> → « Mail » ; Thunderbird : extension ImportExportTools). Seuls les en-têtes sont lus (expéditeur, date, objet), et le fichier est supprimé juste après l'analyse. Un export de plusieurs Go peut prendre quelques minutes.</p>
   <form method="post" action="{{ url_for('wiper.analyser_mbox') }}" enctype="multipart/form-data" class="filtres">
     <input type="file" name="mbox" accept=".mbox,application/mbox">
     <button>Analyser</button>

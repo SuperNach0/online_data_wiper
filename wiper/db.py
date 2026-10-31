@@ -39,6 +39,10 @@ CREATE TABLE IF NOT EXISTS profil (
     date_naissance TEXT, telephone TEXT, pseudos TEXT
 );
 INSERT OR IGNORE INTO profil (id) VALUES (1);
+CREATE TABLE IF NOT EXISTS reglage (
+    cle TEXT PRIMARY KEY,
+    valeur TEXT
+);
 CREATE TABLE IF NOT EXISTS decouverte_mail (
     domaine TEXT PRIMARY KEY,
     nb INTEGER NOT NULL,
@@ -156,6 +160,19 @@ def analyser_mbox_command(chemin):
     total, stats = analyser_mbox(chemin, mes_emails(db))
     enregistrer_analyse_mail(db, stats)
     click.echo(f"{total} e-mails lus, {len(stats)} expéditeurs trouvés. Résultats dans l'onglet Découverte.")
+
+
+def lire_reglages(db):
+    return {r["cle"]: r["valeur"] for r in db.execute("SELECT cle, valeur FROM reglage")}
+
+
+def ecrire_reglages(db, valeurs):
+    for cle, valeur in valeurs.items():
+        if valeur:
+            db.execute("INSERT OR REPLACE INTO reglage (cle, valeur) VALUES (?, ?)", (cle, valeur))
+        else:
+            db.execute("DELETE FROM reglage WHERE cle = ?", (cle,))
+    db.commit()
 
 
 def mes_emails(db):
