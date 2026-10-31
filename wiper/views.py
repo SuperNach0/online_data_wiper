@@ -1,11 +1,9 @@
-import re
-import unicodedata
 from datetime import datetime, timedelta, timezone
 
 from flask import Blueprint, abort, current_app, flash, redirect, render_template, request, url_for
 
 from . import courriers, mailer
-from .db import STATUTS, get_db, maintenant
+from .db import STATUTS, ajouter_cible, get_db, maintenant
 
 bp = Blueprint("wiper", __name__)
 
@@ -45,11 +43,6 @@ def cnil_possible(cible):
 
 def get_profil():
     return get_db().execute("SELECT * FROM profil WHERE id = 1").fetchone()
-
-
-def _slugify(texte):
-    t = unicodedata.normalize("NFKD", texte).encode("ascii", "ignore").decode()
-    return re.sub(r"[^a-z0-9]+", "-", t.lower()).strip("-") or "cible"
 
 
 @bp.app_context_processor
@@ -157,25 +150,17 @@ def ajouter():
             flash("Le nom est obligatoire.")
             return render_template("ajouter.html", form=request.form), 400
         db = get_db()
-        base = slug = "perso-" + _slugify(nom)
-        i = 2
-        while db.execute("SELECT 1 FROM cible WHERE slug = ?", (slug,)).fetchone():
-            slug, i = f"{base}-{i}", i + 1
-        cur = db.execute(
-            """INSERT INTO cible (slug, nom, categorie, site, optout_url, contact_rgpd, notes, maj, personnalisee)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
-            (
-                slug, nom, request.form.get("categorie", "").strip() or "Site / compte perso",
-                request.form.get("site", "").strip() or None,
-                request.form.get("optout_url", "").strip() or None,
-                request.form.get("contact_rgpd", "").strip() or None,
-                request.form.get("notes", "").strip() or None, maintenant(),
-            ),
+        cid = ajouter_cible(
+            db, nom, request.form.get("categorie", "").strip() or "Site / compte perso",
+            site=request.form.get("site", "").strip() or None,
+            optout_url=request.form.get("optout_url", "").strip() or None,
+            contact_rgpd=request.form.get("contact_rgpd", "").strip() or None,
+            notes=request.form.get("notes", "").strip() or None,
         )
         db.commit()
         flash(f"{nom} ajouté au suivi.")
-        return redirect(url_for("wiper.cible", cible_id=cur.lastrowid))
-    return render_template("ajouter.html", form={})
+        return redirect(url_for("wiper.cible", cible_id=cid))
+    return render_template("ajouter.html", form=request.args)
 
 
 @bp.route("/profil", methods=["GET", "POST"])

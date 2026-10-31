@@ -16,7 +16,7 @@ def create_app(test_config=None):
         app.config.update(test_config)
     os.makedirs(app.instance_path, exist_ok=True)
 
-    from . import db, views
+    from . import db, views, views_decouverte  # noqa: F401 : enregistre les routes
 
     db.init_app(app)
     app.register_blueprint(views.bp)
