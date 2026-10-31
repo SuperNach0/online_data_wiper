@@ -6,7 +6,7 @@ a = Analysis(
         ("wiper/static", "wiper/static"),
         ("wiper/data", "wiper/data"),
     ],
-    hiddenimports=["wiper.views_auto", "wiper.views_decouverte", "wiper.views_reglages"],
+    hiddenimports=["wiper.views_auto", "wiper.views_bilan", "wiper.views_decouverte", "wiper.views_reglages"],
 )
 pyz = PYZ(a.pure)
 exe = EXE(

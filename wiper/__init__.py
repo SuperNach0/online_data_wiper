@@ -67,7 +67,7 @@ def create_app(test_config=None):
     def sante():
         return "online-data-wiper"
 
-    from . import db, views, views_auto, views_decouverte, views_reglages  # noqa: F401 : enregistre les routes
+    from . import db, views, views_auto, views_bilan, views_decouverte, views_reglages  # noqa: F401 : enregistre les routes
 
     db.init_app(app)
     app.register_blueprint(views.bp)
