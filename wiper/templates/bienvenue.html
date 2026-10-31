@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titre %}Bienvenue{% endblock %}
+{% block contenu %}
+<div class="assistant">
+<ol class="etapes-assistant">
+  <li class="{{ 'actif' if etape == '1' }}">1. Toi</li>
+  <li class="{{ 'actif' if etape == '2' }}">2. Ton e-mail</li>
+  <li class="{{ 'actif' if etape == '3' }}">3. C'est parti</li>
+</ol>
+{% if erreur %}<p class="flash erreur">{{ erreur }}</p>{% endif %}
+
+{% if etape == '1' %}
+  <h1>Bienvenue</h1>
+  <p class="aide">L'appli va écrire en ton nom aux organismes qui détiennent tes données, pour leur demander de les effacer. Pour te retrouver dans leurs fichiers, ils ont besoin de ton nom et des adresses e-mail que tu as utilisées. Tout reste sur ce PC.</p>
+  <form method="post" class="ajout">
+    <input type="hidden" name="etape" value="1">
+    <label>Prénom<input name="prenom" value="{{ p.prenom or '' }}" autofocus></label>
+    <label>Nom<input name="nom" value="{{ p.nom or '' }}" required></label>
+    <label>Tes adresses e-mail <small>une par ligne, y compris les anciennes</small><textarea name="emails" rows="3" required>{{ p.emails or '' }}</textarea></label>
+    <button class="gros">Continuer</button>
+  </form>
+
+{% elif etape == '2' %}
+  <h1>Ton e-mail</h1>
+  <p class="aide">Les demandes partent depuis ta propre adresse, et l'appli lit ta boîte (sans rien modifier) pour trouver tes comptes et les réponses. Il lui faut un <strong>mot de passe d'application</strong> : un code spécial, différent de ton vrai mot de passe, que tu peux révoquer à tout moment.</p>
+  <form method="post" class="ajout">
+    <input type="hidden" name="etape" value="2">
+    <label>Adresse e-mail<input name="smtp_user" type="email" value="{{ compte }}" required></label>
+    {% if aide %}
+      <p><a class="bouton" href="{{ aide[1] }}" target="_blank" rel="noopener noreferrer">Créer mon mot de passe d'application {{ aide[0] }} ↗</a></p>
+      <p class="aide">{{ aide[2] }}</p>
+    {% endif %}
+    <label>Mot de passe d'application<input name="smtp_password" type="password" autocomplete="new-password" placeholder="{{ '•••••••• (déjà enregistré)' if r.get('smtp_password') else 'abcd efgh ijkl mnop' }}"></label>
+    <button class="gros">Tester la connexion et continuer</button>
+  </form>
+  <p><a href="{{ url_for('wiper.bienvenue', etape='1') }}">← Retour</a></p>
+
+{% else %}
+  <h1>C'est parti</h1>
+  <p>Connexion à ta boîte mail réussie. Voici ce que l'appli va faire toute seule dès que tu cliques sur « Démarrer » :</p>
+  <form method="post" class="ajout">
+    <input type="hidden" name="etape" value="3">
+    <label class="case"><input type="checkbox" name="auto_brokers" value="1" checked>
+      <span>Envoyer une demande d'effacement aux <strong>{{ plan_auto|length }} data brokers et publicitaires</strong> joignables par e-mail
+      <small>{{ plan_auto|map(attribute='cible.nom')|join(', ') }}</small></span></label>
+    <label class="case"><input type="checkbox" name="auto_comptes" value="1" checked>
+      <span>Analyser ta boîte mail et demander la suppression de tes <strong>comptes oubliés</strong>
+      <small>Ceux qui ne t'ont pas écrit depuis plus d'un an. Jamais les banques, assurances, santé, administrations, opérateurs ni écoles. Au plus 40 e-mails par passage.</small></span></label>
+    <label class="case"><input type="checkbox" name="auto_relances" value="1" checked>
+      <span>Lire les réponses et <strong>relancer</strong> les organismes muets après 30 jours</span></label>
+    {% if win_possible %}<label class="case"><input type="checkbox" name="demarrage_windows" value="1" checked>
+      <span>Démarrer avec Windows, discrètement <small>pour que tout continue même si tu oublies l'appli</small></span></label>{% endif %}
+    <p class="aide">Restera à faire par toi : {{ nb_manuel }} formulaires ou réglages en ligne (captchas, comptes Google/Meta…), regroupés dans une liste avec les liens directs. Chaque e-mail envoyé reste visible dans le Bilan, et une copie arrive dans ta boîte.</p>
+    <button class="gros">Démarrer</button>
+  </form>
+  <p><a href="{{ url_for('wiper.bienvenue', etape='2') }}">← Retour</a></p>
+{% endif %}
+</div>
+{% endblock %}

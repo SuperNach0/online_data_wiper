@@ -3,6 +3,9 @@
 {% block tete %}{% if tache.en_cours %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
 {% block contenu %}
 <h1>Pilote automatique</h1>
+{% if r.get('mode_auto') == '1' %}
+<p class="flash ok-auto"><strong>Mode automatique activé.</strong> L'appli travaille toute seule toutes les 4 heures : analyse de ta boîte chaque semaine, envoi des demandes, lecture des réponses, relances. Tu reçois une notification quand il se passe quelque chose.{% if r.derniere_auto %} Dernier passage : {{ r.derniere_auto[:16].replace('T', ' ') }} (UTC).{% endif %}</p>
+{% endif %}
 
 <section class="bloc etapes">
   <h2>Avant de commencer</h2>
@@ -92,12 +95,13 @@
 </section>
 
 <section class="bloc">
-  <h2>Chaque jour, tout seul</h2>
-  <p class="aide">Tant que l'appli est ouverte, une fois par jour elle lit les réponses des organismes et repère les adresses invalides. Elle envoie aussi les relances à 30 jours et revérifie les fuites, si tu as une clé Have I Been Pwned.
-    {% if r.derniere_auto %}Dernier passage : {{ r.derniere_auto[:16].replace('T', ' ') }}.{% endif %}</p>
+  <h2>Automatisation</h2>
   <form method="post" action="{{ url_for('wiper.auto_options') }}" class="options">
+    <label class="case"><input type="checkbox" name="mode_auto" value="1" {{ 'checked' if r.get('mode_auto') == '1' }}> Mode automatique (envoyer les demandes sans me demander)</label>
+    <label class="case"><input type="checkbox" name="auto_brokers" value="1" {{ 'checked' if r.get('auto_brokers', '1') == '1' }}> … aux data brokers et publicitaires</label>
+    <label class="case"><input type="checkbox" name="auto_comptes" value="1" {{ 'checked' if r.get('auto_comptes', '1') == '1' }}> … à mes comptes oubliés (plus d'un an sans e-mail, hors banques, santé, administrations, opérateurs)</label>
     <label class="case"><input type="checkbox" name="auto_relances" value="1" {{ 'checked' if r.get('auto_relances', '1') == '1' }}> Envoyer les relances automatiquement</label>
-    {% if win_possible %}<label class="case"><input type="checkbox" name="demarrage_windows" value="1" {{ 'checked' if win_actif }}> Lancer l'appli au démarrage de Windows (fenêtre réduite)</label>{% endif %}
+    {% if win_possible %}<label class="case"><input type="checkbox" name="demarrage_windows" value="1" {{ 'checked' if win_actif }}> Lancer l'appli au démarrage de Windows (discrètement, près de l'horloge)</label>{% endif %}
     <button class="secondaire">Enregistrer</button>
   </form>
   <form method="post" action="{{ url_for('wiper.auto_maintenant') }}"><button class="secondaire" {{ 'disabled' if tache.en_cours or not boite_ok }}>Vérifier maintenant</button></form>

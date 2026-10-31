@@ -13,22 +13,23 @@ Application personnelle pour réduire au maximum son empreinte en ligne : data b
 
 1. Va dans [Releases](https://github.com/SuperNach0/online_data_wiper/releases/latest) et télécharge **OnlineDataWiper.exe**.
 2. Double-clique dessus. Si Windows affiche « Windows a protégé votre ordinateur », clique sur « Informations complémentaires » puis « Exécuter quand même » (l'exe n'est pas signé, c'est normal pour un outil perso).
-3. Ton navigateur s'ouvre sur le tableau de bord. Laisse la fenêtre noire ouverte pendant que tu utilises l'appli ; ferme-la pour arrêter.
+3. L'appli s'installe toute seule dans `%LOCALAPPDATA%\Programs\OnlineDataWiper`, crée un raccourci dans le menu Démarrer et sur le bureau, puis s'ouvre dans sa propre fenêtre (plus de navigateur ni de fenêtre noire). Tu peux supprimer l'exe téléchargé.
+4. Au premier lancement, un **assistant en 3 écrans** te demande ton nom, ton e-mail et un mot de passe d'application (liens directs pour Gmail, Outlook, Yahoo, iCloud). Il teste la connexion, puis tout démarre tout seul.
 
-Tes données sont dans `%APPDATA%\OnlineDataWiper` (copie ce dossier pour faire une sauvegarde). Les réglages d'envoi d'e-mails et la clé Have I Been Pwned se font dans l'onglet **Réglages** de l'appli : plus besoin de terminal.
+Fermer la fenêtre ne coupe pas l'appli : elle reste près de l'horloge (icône bouclier) et continue son travail. Clic droit sur l'icône > **Quitter** pour l'arrêter vraiment. Elle se relance au démarrage de Windows, en arrière-plan (désactivable dans Pilote automatique).
 
-Pour une nouvelle version, télécharge le nouvel exe et remplace l'ancien : tes données sont conservées.
+Tes données sont dans `%APPDATA%\OnlineDataWiper` (copie ce dossier pour faire une sauvegarde). Pour une nouvelle version, télécharge le nouvel exe et double-clique : il remplace l'ancien et garde tes données.
 
 ## Pilote automatique
 
-L'onglet **Pilote automatique** fait le maximum à ta place :
+Une fois l'assistant terminé, l'appli fait tout ce qu'elle peut sans toi, **toutes les 4 heures** :
 
-1. Remplis ton profil et, dans Réglages, ton e-mail + un mot de passe d'application (Gmail, Outlook, Orange, Free, SFR, La Poste, Yahoo, iCloud détectés automatiquement).
-2. **Analyser ma boîte mail** : l'appli lit les en-têtes de tes e-mails (lecture seule) et liste les comptes que tu as créés au fil des années.
-3. **Tout lancer** : les demandes RGPD partent depuis ton adresse vers les data brokers et les comptes que tu as cochés. Les adresses de contact viennent d'un annuaire de ~2 500 organismes (base libre [datarequests.org](https://www.datarequests.org), licence CC0, régénérée par `outils/construire_annuaire.py`).
-4. Ensuite, une fois par jour tant que l'appli est ouverte : lecture des réponses (statut « Réponse reçue »), détection des adresses qui rebondissent, relances à 30 jours, vérification des fuites. Option pour lancer l'appli au démarrage de Windows.
+1. Analyse ta boîte mail (en-têtes seulement, lecture seule, une fois par semaine) pour trouver les comptes que tu as créés au fil des années.
+2. Envoie les demandes RGPD depuis ton adresse aux data brokers et aux comptes inactifs depuis plus d'un an (40 envois maximum par passage). Les adresses de contact viennent d'un annuaire de ~2 500 organismes (base libre [datarequests.org](https://www.datarequests.org), licence CC0, régénérée par `outils/construire_annuaire.py`).
+3. Lit les réponses (statut « Réponse reçue »), repère les adresses qui rebondissent, relance à 30 jours et vérifie les fuites chaque semaine.
+4. Te prévient par une notification Windows quand il se passe quelque chose d'important.
 
-Ce qui reste manuel est regroupé dans **À faire par toi** : formulaires web avec captcha, réglages dans tes comptes Google/Meta/Amazon, réponses qui demandent une pièce d'identité, et dépôt des plaintes CNIL (texte prêt).
+Chaque étape se coupe dans **Pilote automatique > Automatisation**. Ce qui reste manuel est regroupé dans **À faire par toi** : formulaires web avec captcha, réglages dans tes comptes Google/Meta/Amazon, réponses qui demandent une pièce d'identité, et dépôt des plaintes CNIL (texte prêt). L'onglet **Bilan** résume tout ce qui a été fait.
 
 ## Lancer depuis le code (développement)
 

@@ -82,3 +82,11 @@ td.col-barre { min-width: 120px; } td.date { white-space: nowrap; color: var(--m
   .bloc, .stat, .table-wrap { border-color: #ccc; break-inside: avoid; }
   a { color: inherit; text-decoration: none; }
 }
+.assistant { max-width: 680px; margin: 0 auto; }
+.etapes-assistant { display: flex; gap: 8px; list-style: none; padding: 0; margin: 8px 0 24px; }
+.etapes-assistant li { flex: 1; padding: 8px; border-bottom: 3px solid var(--line); color: var(--muted); font-size: 14px; }
+.etapes-assistant li.actif { border-color: var(--accent); color: var(--fg); font-weight: 600; }
+.assistant label.case { align-items: flex-start; }
+.assistant label.case span small { display: block; margin-top: 2px; }
+.flash.erreur { border-left-color: var(--s-refus); }
+.flash.ok-auto { border-left-color: var(--s-supprime); }

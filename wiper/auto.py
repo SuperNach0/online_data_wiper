@@ -22,13 +22,34 @@ REBOND = re.compile(
 )
 
 
-# --------------------------------------------------------------------------
-# Journal
-# --------------------------------------------------------------------------
+# Catégories de l'annuaire qu'on ne supprime jamais automatiquement.
+SENSIBLES = {
+    "finance", "insurance", "health", "public body", "utility", "telecommunication", "school",
+    "church", "political party", "collection agency", "credit agency", "nonprofit",
+}
+MOTS_SENSIBLES = re.compile(
+    r"banque|bank|crédit|credit|assurance|insurance|mutuelle|santé|sante|health|impots|impôts|"
+    r"gouv|caf\.fr|ameli|urssaf|pole-emploi|france-travail|edf|engie|orange|sfr|free\.fr|bouygues|"
+    r"laposte|paypal|boursorama|revolut|lydia|doctolib|edu|universit|ecole|école",
+    re.IGNORECASE,
+)
 
-def journal(db, message, niveau="info"):
+# ----------------------------------------------------------------------------
+# Journal et notifications
+# ----------------------------------------------------------------------------
+
+# Remplacé par l'appli de bureau pour afficher une notification Windows.
+notifier = None
+
+
+def journal(db, message, niveau="info", notifier_aussi=False):
     db.execute("INSERT INTO journal (date, niveau, message) VALUES (?, ?, ?)", (maintenant(), niveau, message))
     db.commit()
+    if notifier_aussi and notifier:
+        try:
+            notifier(message)
+        except Exception:  # noqa: BLE001
+            pass
 
 
 # --------------------------------------------------------------------------
@@ -68,6 +89,21 @@ def comptes_trouves(db):
             continue
         a = annuaire.chercher(d["domaine"])
         res.append({"d": d, "contact": a["email"] if a else None, "nom": a["nom"] if a else d["domaine"]})
+    return res
+
+
+def comptes_oublies(db, jours=365):
+    """Comptes probables, sans e-mail depuis `jours`, hors catégories sensibles, avec un contact connu."""
+    limite = (date.today() - timedelta(days=jours)).isoformat()
+    res = []
+    for c in comptes_trouves(db):
+        d = c["d"]
+        if not c["contact"] or not d["dernier"] or d["dernier"] > limite:
+            continue
+        a = annuaire.chercher(d["domaine"])
+        if set(a.get("categories", [])) & SENSIBLES or MOTS_SENSIBLES.search(d["domaine"]):
+            continue
+        res.append(c)
     return res
 
 
@@ -117,7 +153,9 @@ def envoyer_lot(db, envois, type_courrier="effacement", progression=None):
             progression(i + 1, len(envois))
         if pause and i + 1 < len(envois):
             time.sleep(pause)
-    journal(db, f"{ok} courrier(s) {'de relance ' if type_courrier == 'relance' else ''}envoyé(s) automatiquement.")
+    if ok:
+        journal(db, f"{ok} {'relance(s)' if type_courrier == 'relance' else 'demande(s) RGPD'} envoyée(s) automatiquement.",
+                notifier_aussi=True)
     for e in erreurs:
         journal(db, f"Échec d'envoi : {e}", "erreur")
     return ok, erreurs
@@ -226,7 +264,7 @@ def lire_reponses(db, cfg=None, imap=None):
     messages = boite.messages_recents(cfg, depuis, imap=imap)
     reponses, rebonds = traiter_reponses(db, messages)
     if reponses or rebonds:
-        journal(db, f"Boîte mail : {reponses} réponse(s) d'organismes, {rebonds} adresse(s) invalide(s).")
+        journal(db, f"{reponses} réponse(s) d'organismes reçue(s), {rebonds} adresse(s) invalide(s).", notifier_aussi=True)
     return reponses, rebonds
 
 
@@ -246,8 +284,40 @@ def scanner_boite(db, progression=None, imap=None):
 # Tâche quotidienne et tâches de fond
 # --------------------------------------------------------------------------
 
-def tache_quotidienne(db):
+def envois_automatiques(db, maximum=None):
+    """En mode automatique : data brokers puis comptes oubliés, dans la limite de `maximum` e-mails par passage."""
     r = lire_reglages(db)
+    maximum = maximum or current_app.config.get("AUTO_MAX_ENVOIS", 40)
+    envois = []
+    if r.get("auto_brokers", "1") == "1":
+        auto_plan, _ = plan(db)
+        envois += [(p["cible"]["id"], p["destinataire"]) for p in auto_plan]
+    if r.get("auto_comptes", "1") == "1":
+        place = maximum - len(envois)
+        if place > 0:
+            domaines = [c["d"]["domaine"] for c in comptes_oublies(db)][:place]
+            envois += preparer_comptes(db, domaines)
+    envois = envois[:maximum]
+    if not envois:
+        return 0
+    ok, _ = envoyer_lot(db, envois)
+    return ok
+
+
+def tache_quotidienne(db, progression=None):
+    """Un passage complet du pilote. Chaque étape est indépendante : une erreur n'arrête pas les suivantes."""
+    r = lire_reglages(db)
+    mode_auto = r.get("mode_auto") == "1"
+    if mode_auto and boite.config() and (not r.get("dernier_scan") or r["dernier_scan"] < _il_y_a(7)):
+        try:
+            scanner_boite(db, progression)
+        except Exception as e:  # noqa: BLE001
+            journal(db, f"Analyse de la boîte mail impossible : {e}", "erreur")
+    if mode_auto and mailer.config():
+        try:
+            envois_automatiques(db)
+        except Exception as e:  # noqa: BLE001
+            journal(db, f"Envois automatiques impossibles : {e}", "erreur")
     try:
         lire_reponses(db)
     except Exception as e:  # noqa: BLE001
@@ -267,10 +337,11 @@ def tache_quotidienne(db):
             n = enregistrer_fuites(db, res)
             ecrire_reglages(db, {"derniere_hibp": maintenant()})
             if n:
-                journal(db, f"{n} nouvelle(s) fuite(s) de données trouvée(s).")
+                journal(db, f"{n} nouvelle(s) fuite(s) de données trouvée(s).", notifier_aussi=True)
         except Exception as e:  # noqa: BLE001
             journal(db, f"Vérification des fuites impossible : {e}", "erreur")
     ecrire_reglages(db, {"derniere_auto": maintenant()})
+    return "Passage terminé : voir le journal."
 
 
 def _il_y_a(jours=0, heures=0):
@@ -309,8 +380,8 @@ class Taches:
 TACHES = Taches()
 
 
-def demarrer_pilote(app, intervalle=3600, delai=60):
-    """Thread qui lance la tâche quotidienne au plus une fois toutes les 20 h, tant que l'appli tourne."""
+def demarrer_pilote(app, intervalle=900, delai=30, frequence_heures=4):
+    """Thread qui lance un passage complet toutes les `frequence_heures`, tant que l'appli tourne."""
 
     def boucle():
         time.sleep(delai)
@@ -318,12 +389,10 @@ def demarrer_pilote(app, intervalle=3600, delai=60):
             with app.app_context():
                 db = get_db()
                 derniere = lire_reglages(db).get("derniere_auto")
-                if not derniere or derniere < _il_y_a(heures=20):
-                    with TACHES.verrou:
-                        try:
-                            tache_quotidienne(db)
-                        except Exception as e:  # noqa: BLE001
-                            journal(db, f"Pilote automatique : {e}", "erreur")
+                if not derniere or derniere < _il_y_a(heures=frequence_heures):
+                    def passage(db, progression):
+                        return tache_quotidienne(db, progression)
+                    TACHES.lancer(app, "Passage automatique", passage)
             time.sleep(intervalle)
 
     threading.Thread(target=boucle, daemon=True).start()

@@ -42,6 +42,8 @@ def create_app(test_config=None):
         RELANCE_JOURS=30,
         CNIL_JOURS=15,
         AUTO_PAUSE=3,
+        AUTO_MAX_ENVOIS=40,
+        ASSISTANT=True,
     )
     if test_config:
         app.config.update(test_config)
@@ -67,7 +69,15 @@ def create_app(test_config=None):
     def sante():
         return "online-data-wiper"
 
-    from . import db, views, views_auto, views_bilan, views_decouverte, views_reglages  # noqa: F401 : enregistre les routes
+    @app.post("/bureau/<action>")
+    def commande_bureau(action):
+        b = app.config.get("BUREAU")
+        if b is None or action not in ("afficher", "quitter"):
+            abort(404)
+        getattr(b, action)()
+        return "ok"
+
+    from . import db, views, views_assistant, views_auto, views_bilan, views_decouverte, views_reglages  # noqa: F401 : enregistre les routes
 
     db.init_app(app)
     app.register_blueprint(views.bp)
