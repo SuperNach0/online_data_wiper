@@ -74,6 +74,23 @@ def config():
     return _depuis_env() or _depuis_reglages()
 
 
+def _connecter(cfg):
+    if cfg["port"] == 465:
+        serveur = smtplib.SMTP_SSL(cfg["host"], cfg["port"], timeout=30)
+    else:
+        serveur = smtplib.SMTP(cfg["host"], cfg["port"], timeout=30)
+        serveur.starttls()
+    if cfg["user"]:
+        serveur.login(cfg["user"], cfg["password"] or "")
+    return serveur
+
+
+def tester(cfg=None):
+    """Se connecte au serveur d'envoi sans rien envoyer. Lève une exception en cas d'échec."""
+    with _connecter(cfg or config()):
+        pass
+
+
 def envoyer(destinataire, objet, corps, cfg=None, copie_a_moi=True):
     cfg = cfg or config()
     if not cfg:
@@ -85,13 +102,5 @@ def envoyer(destinataire, objet, corps, cfg=None, copie_a_moi=True):
         msg["Bcc"] = cfg["from"]  # garder une preuve d'envoi dans sa propre boîte
     msg["Subject"] = objet
     msg.set_content(corps)
-    if cfg["port"] == 465:
-        serveur = smtplib.SMTP_SSL(cfg["host"], cfg["port"], timeout=30)
-    else:
-        serveur = smtplib.SMTP(cfg["host"], cfg["port"], timeout=30)
-    with serveur as s:
-        if cfg["port"] != 465:
-            s.starttls()
-        if cfg["user"]:
-            s.login(cfg["user"], cfg["password"] or "")
+    with _connecter(cfg) as s:
         s.send_message(msg)

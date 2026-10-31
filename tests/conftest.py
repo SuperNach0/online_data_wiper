@@ -6,7 +6,7 @@ from wiper.db import get_db
 
 @pytest.fixture
 def app(tmp_path):
-    return create_app({"TESTING": True, "DATABASE": str(tmp_path / "test.sqlite3")})
+    return create_app({"TESTING": True, "ASSISTANT": False, "AUTO_PAUSE": 0, "DATABASE": str(tmp_path / "test.sqlite3")})
 
 
 @pytest.fixture

@@ -80,7 +80,8 @@ def auto_maintenant():
 @bp.post("/auto/options")
 def auto_options():
     db = get_db()
-    ecrire_reglages(db, {"auto_relances": "1" if request.form.get("auto_relances") else "0"})
+    ecrire_reglages(db, {k: "1" if request.form.get(k) else "0"
+                         for k in ("mode_auto", "auto_brokers", "auto_comptes", "auto_relances")})
     if demarrage_windows_possible():
         try:
             regler_demarrage_windows(bool(request.form.get("demarrage_windows")))

@@ -6,7 +6,7 @@ a = Analysis(
         ("wiper/static", "wiper/static"),
         ("wiper/data", "wiper/data"),
     ],
-    hiddenimports=["wiper.views_auto", "wiper.views_bilan", "wiper.views_decouverte", "wiper.views_reglages"],
+    hiddenimports=["pystray._win32", "webview.platforms.edgechromium", "wiper.bureau", "wiper.views_assistant", "wiper.views_auto", "wiper.views_bilan", "wiper.views_decouverte", "wiper.views_reglages"],
 )
 pyz = PYZ(a.pure)
 exe = EXE(
@@ -15,7 +15,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     name="OnlineDataWiper",
-    console=True,  # la fenêtre noire sert à voir que l'appli tourne et à l'arrêter
+    console=False,  # vraie appli : pas de fenêtre noire
     upx=False,
-    icon=None,
+    icon="wiper/static/icone.ico",
 )

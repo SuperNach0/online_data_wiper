@@ -26,16 +26,27 @@ jobs:
         run: python -m pytest -q
       - name: Fabriquer OnlineDataWiper.exe
         run: pyinstaller --noconfirm OnlineDataWiper.spec
-      - name: Vérifier que l'exe démarre
+      - name: Vérifier que l'exe s'installe et démarre
         shell: pwsh
         run: |
           $env:BROWSER = "none"
+          $env:WIPER_SANS_FENETRE = "1"
           $env:WIPER_DATA_DIR = "$env:RUNNER_TEMP\wiper-test"
-          $p = Start-Process -FilePath dist\OnlineDataWiper.exe -PassThru
-          Start-Sleep -Seconds 8
-          $r = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5000/
-          Stop-Process -Id $p.Id
-          if ($r.StatusCode -ne 200 -or $r.Content -notmatch "Acxiom") { throw "L'exe ne répond pas correctement" }
+          Start-Process -FilePath dist\OnlineDataWiper.exe -ArgumentList "--arriere-plan"
+          $ok = $false
+          for ($i = 0; $i -lt 30 -and -not $ok; $i++) {
+            Start-Sleep -Seconds 2
+            try {
+              $r = Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5000/
+              $ok = ($r.StatusCode -eq 200 -and $r.Content -match "Bienvenue")
+            } catch {}
+          }
+          $installe = Test-Path "$env:LOCALAPPDATA\Programs\OnlineDataWiper\OnlineDataWiper.exe"
+          $menu = Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Online Data Wiper.lnk"
+          Get-Process -Name OnlineDataWiper -ErrorAction SilentlyContinue | Stop-Process -Force
+          if (-not $ok) { throw "L'appli installée ne répond pas" }
+          if (-not $installe) { throw "L'exe n'a pas été installé" }
+          if (-not $menu) { throw "Raccourci du menu Démarrer manquant" }
       - uses: actions/upload-artifact@v4
         with:
           name: OnlineDataWiper-windows
