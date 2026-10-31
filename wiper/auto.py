@@ -88,8 +88,20 @@ def comptes_trouves(db):
         if d["domaine"] in suivis:
             continue
         a = annuaire.chercher(d["domaine"])
-        res.append({"d": d, "contact": a["email"] if a else None, "nom": a["nom"] if a else d["domaine"]})
+        res.append({
+            "d": d,
+            "contact": a["email"] if a else adresse_probable(d["domaine"]),
+            "devine": not a,
+            "nom": a["nom"] if a else d["domaine"],
+        })
+    res.sort(key=lambda c: c["devine"])  # contacts connus d'abord
     return res
+
+
+def adresse_probable(domaine):
+    """Adresse RGPD la plus courante quand l'annuaire ne connaît pas le site. Si elle rebondit,
+    la cible passe d'elle-même dans « À faire par toi »."""
+    return f"privacy@{domaine}"
 
 
 def comptes_oublies(db, jours=365):
@@ -98,7 +110,7 @@ def comptes_oublies(db, jours=365):
     res = []
     for c in comptes_trouves(db):
         d = c["d"]
-        if not c["contact"] or not d["dernier"] or d["dernier"] > limite:
+        if c["devine"] or not d["dernier"] or d["dernier"] > limite:
             continue
         a = annuaire.chercher(d["domaine"])
         if set(a.get("categories", [])) & SENSIBLES or MOTS_SENSIBLES.search(d["domaine"]):
@@ -175,10 +187,9 @@ def preparer_comptes(db, domaines):
         notes += "."
         cid = ajouter_cible(
             db, a["nom"] if a else dom, "Compte en ligne", site=f"https://{dom}",
-            contact_rgpd=a["email"] if a else None, notes=notes, slug=f"mail-{dom}",
+            contact_rgpd=a["email"] if a else adresse_probable(dom), notes=notes, slug=f"mail-{dom}",
         )
-        if a:
-            envois.append((cid, a["email"]))
+        envois.append((cid, a["email"] if a else adresse_probable(dom)))
     db.commit()
     return envois
 

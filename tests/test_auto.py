@@ -136,3 +136,18 @@ def test_messages_recents_imap():
 def test_page_pilote(client):
     html = client.get("/auto").get_data(as_text=True)
     assert "Tout lancer" in html and "À faire par toi" in html and "Criteo" in html
+
+
+def test_compte_inconnu_cochable_avec_adresse_probable(app):
+    with app.app_context():
+        db = get_db()
+        db.execute(
+            "INSERT INTO decouverte_mail (domaine, nb, compte, premier, dernier) VALUES (?, ?, ?, ?, ?)",
+            ("petit-site-inconnu.fr", 3, 2, "2015-01-01", "2016-01-01"),
+        )
+        db.commit()
+        c = [c for c in auto.comptes_trouves(db) if c["d"]["domaine"] == "petit-site-inconnu.fr"][0]
+        assert c["devine"] and c["contact"] == "privacy@petit-site-inconnu.fr"
+        assert c not in auto.comptes_oublies(db)  # jamais envoyé sans que tu coches
+        envois = auto.preparer_comptes(db, ["petit-site-inconnu.fr"])
+        assert envois and envois[0][1] == "privacy@petit-site-inconnu.fr"
