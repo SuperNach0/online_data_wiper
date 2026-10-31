@@ -46,12 +46,13 @@
       L'appli lit seulement l'expéditeur, la date et l'objet de tes e-mails, sans rien modifier.</p>
   {% else %}<p class="aide">Disponible une fois ton e-mail réglé.</p>{% endif %}
   {% if comptes %}
-  <p class="aide">Coche les comptes à <strong>supprimer</strong>. Rien n'est coché d'office : ne coche pas ta banque ou un service que tu utilises encore.</p>
+  <p class="aide">Coche les comptes à <strong>supprimer</strong>. Rien n'est coché d'office : ne coche pas ta banque ou un service que tu utilises encore.
+    <button type="button" class="secondaire" onclick="document.querySelectorAll('input[name=domaine]').forEach(function(c){c.checked=true})">Tout cocher</button></p>
   <ul class="cases">
     {% for c in comptes %}
     <li><label>
-      {% if c.contact %}<input type="checkbox" name="domaine" value="{{ c.d.domaine }}">{% else %}<input type="checkbox" disabled title="Pas de contact connu">{% endif %}
-      <strong>{{ c.nom }}</strong> <small>{{ c.d.domaine }} · {{ c.d.nb }} e-mail(s), {{ c.d.premier or '?' }} → {{ c.d.dernier or '?' }}{% if c.contact %} · {{ c.contact }}{% else %} · pas de contact connu, <a href="{{ url_for('wiper.ajouter', nom=c.d.domaine, site='https://' ~ c.d.domaine, categorie='Compte en ligne') }}">ajouter à la main</a>{% endif %}</small>
+      <input type="checkbox" name="domaine" value="{{ c.d.domaine }}">
+      <strong>{{ c.nom }}</strong> <small>{{ c.d.domaine }} · {{ c.d.nb }} e-mail(s), {{ c.d.premier or '?' }} → {{ c.d.dernier or '?' }} · {{ c.contact }}{% if c.devine %} (adresse probable : si elle n'existe pas, le site passe dans « À faire par toi »){% endif %}</small>
     </label></li>
     {% endfor %}
   </ul>
