@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titre %}Ajouter un site{% endblock %}
+{% block contenu %}
+<h1>Ajouter un site où tu apparais</h1>
+<form method="post" class="ajout">
+  <label>Nom *<input name="nom" required value="{{ form.get('nom', '') }}"></label>
+  <label>Catégorie<input name="categorie" list="cats" value="{{ form.get('categorie', '') }}" placeholder="Site / compte perso"></label>
+  <datalist id="cats"><option>Site / compte perso</option><option>Réseau social</option><option>Data broker</option><option>Fuite de données</option><option>Résultat de recherche</option></datalist>
+  <label>Site<input name="site" type="url" value="{{ form.get('site', '') }}" placeholder="https://"></label>
+  <label>Page de suppression / opt-out<input name="optout_url" type="url" value="{{ form.get('optout_url', '') }}" placeholder="https://"></label>
+  <label>Contact RGPD (e-mail ou adresse)<input name="contact_rgpd" value="{{ form.get('contact_rgpd', '') }}"></label>
+  <label>Notes<textarea name="notes" rows="3">{{ form.get('notes', '') }}</textarea></label>
+  <button>Ajouter</button>
+</form>
+{% endblock %}
