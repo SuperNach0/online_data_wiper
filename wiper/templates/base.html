@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}Tableau de bord{% endblock %} · Online Data Wiper</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <a class="marque" href="{{ url_for('wiper.index') }}">Online Data Wiper</a>
+    <nav>
+      <a href="{{ url_for('wiper.index') }}">Tableau de bord</a>
+      <a href="{{ url_for('wiper.ajouter') }}">+ Ajouter un site</a>
+    </nav>
+  </header>
+  <main>
+    {% for m in get_flashed_messages() %}<p class="flash">{{ m }}</p>{% endfor %}
+    {% block contenu %}{% endblock %}
+  </main>
+  <footer>Données stockées uniquement sur cet ordinateur (dossier <code>instance/</code>).</footer>
+</body>
+</html>

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block contenu %}
+<section class="stats">
+  <div class="stat"><span class="n">{{ fini }}/{{ total }}</span><span>traitées</span>
+    <div class="barre"><div style="width: {{ (100 * fini / total) | round | int if total else 0 }}%"></div></div>
+  </div>
+  {% for k, label in STATUTS.items() %}
+  <a class="stat s-{{ k }}" href="{{ url_for('wiper.index', statut=k) }}"><span class="n">{{ compte[k] }}</span><span>{{ label }}</span></a>
+  {% endfor %}
+  <a class="stat s-relance" href="{{ url_for('wiper.index', statut='a_relancer') }}"><span class="n">{{ nb_relance }}</span><span>À relancer</span></a>
+</section>
+
+<form class="filtres" method="get">
+  <input type="search" name="q" value="{{ filtre.q }}" placeholder="Rechercher…">
+  <select name="statut">
+    <option value="">Tous les statuts</option>
+    {% for k, label in STATUTS.items() %}<option value="{{ k }}" {{ 'selected' if filtre.statut == k }}>{{ label }}</option>{% endfor %}
+    <option value="a_relancer" {{ 'selected' if filtre.statut == 'a_relancer' }}>À relancer</option>
+  </select>
+  <select name="categorie">
+    <option value="">Toutes les catégories</option>
+    {% for cat in categories %}<option {{ 'selected' if filtre.categorie == cat }}>{{ cat }}</option>{% endfor %}
+  </select>
+  <button>Filtrer</button>
+  {% if filtre.q or filtre.statut or filtre.categorie %}<a href="{{ url_for('wiper.index') }}">Réinitialiser</a>{% endif %}
+</form>
+
+<div class="table-wrap">
+<table>
+  <thead><tr><th>Nom</th><th>Catégorie</th><th>Action</th><th>Statut</th><th></th></tr></thead>
+  <tbody>
+  {% for c in cibles %}
+    <tr>
+      <td><a href="{{ url_for('wiper.cible', cible_id=c.id) }}">{{ c.nom }}</a>{% if c.pays %} <small>{{ c.pays }}</small>{% endif %}</td>
+      <td>{{ c.categorie }}</td>
+      <td>{% if c.optout_url %}<a href="{{ c.optout_url }}" target="_blank" rel="noopener noreferrer">Opt-out ↗</a>{% elif c.site %}<a href="{{ c.site }}" target="_blank" rel="noopener noreferrer">Site ↗</a>{% endif %}
+          {% if c.methode %}<small>{{ c.methode }}</small>{% endif %}</td>
+      <td><span class="badge s-{{ c.statut }}">{{ STATUTS[c.statut] }}</span>{% if a_relancer(c) %} <span class="badge s-relance">À relancer</span>{% endif %}</td>
+      <td>
+        <form method="post" action="{{ url_for('wiper.changer_statut', cible_id=c.id) }}" class="rapide">
+          <input type="hidden" name="retour" value="{{ request.full_path }}">
+          <select name="statut" onchange="this.form.submit()" aria-label="Changer le statut">
+            {% for k, label in STATUTS.items() %}<option value="{{ k }}" {{ 'selected' if c.statut == k }}>{{ label }}</option>{% endfor %}
+          </select>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5">Aucune cible ne correspond.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
