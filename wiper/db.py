@@ -33,6 +33,12 @@ CREATE TABLE IF NOT EXISTS cible (
     maj TEXT NOT NULL,
     personnalisee INTEGER NOT NULL DEFAULT 0
 );
+CREATE TABLE IF NOT EXISTS profil (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    prenom TEXT, nom TEXT, emails TEXT, adresse TEXT,
+    date_naissance TEXT, telephone TEXT, pseudos TEXT
+);
+INSERT OR IGNORE INTO profil (id) VALUES (1);
 CREATE TABLE IF NOT EXISTS evenement (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cible_id INTEGER NOT NULL REFERENCES cible(id) ON DELETE CASCADE,
@@ -83,9 +89,20 @@ def charger_seed(db):
     return ajoutees
 
 
+def migrer(db):
+    """Ajoute les colonnes apparues après la première version, sans perdre de données."""
+    colonnes = {r["name"] for r in db.execute("PRAGMA table_info(cible)")}
+    if "date_relance" not in colonnes:
+        db.execute("ALTER TABLE cible ADD COLUMN date_relance TEXT")
+    if "contenu" not in {r["name"] for r in db.execute("PRAGMA table_info(evenement)")}:
+        db.execute("ALTER TABLE evenement ADD COLUMN contenu TEXT")
+    db.commit()
+
+
 def init_db():
     db = get_db()
     db.executescript(SCHEMA)
+    migrer(db)
     return charger_seed(db)
 
 

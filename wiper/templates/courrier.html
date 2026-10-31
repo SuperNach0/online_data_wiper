@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titre %}Courrier · {{ c.nom }}{% endblock %}
+{% block contenu %}
+<p><a href="{{ url_for('wiper.cible', cible_id=c.id) }}">← {{ c.nom }}</a></p>
+<h1>Courrier pour {{ c.nom }}</h1>
+{% if profil_incomplet %}<p class="flash">Ton <a href="{{ url_for('wiper.profil') }}">profil</a> est incomplet (nom et e-mail). Le courrier aura des trous.</p>{% endif %}
+
+<form method="get" class="filtres">
+  <select name="type" onchange="this.form.submit()">
+    {% for k, m in modeles.items() %}<option value="{{ k }}" {{ 'selected' if k == type_courrier }}>{{ m.label }}</option>{% endfor %}
+  </select>
+</form>
+
+{% if type_courrier == 'plainte_cnil' %}
+<p class="aide">La plainte se dépose en ligne sur <a href="https://www.cnil.fr/fr/plaintes" target="_blank" rel="noopener noreferrer">cnil.fr/fr/plaintes</a>. Copie le texte ci-dessous, puis note-la comme déposée.</p>
+{% elif c.optout_url %}
+<p class="aide">Cet organisme a aussi un <a href="{{ c.optout_url }}" target="_blank" rel="noopener noreferrer">formulaire d'opt-out</a>. Le courrier ci-dessous peut y être collé, ou envoyé par e-mail.</p>
+{% endif %}
+
+<form method="post" class="maj" id="lettre">
+  <input type="hidden" name="type" value="{{ type_courrier }}">
+  <label>Destinataire<input name="destinataire" id="dest" value="{{ destinataire }}" placeholder="dpo@exemple.com"></label>
+  {% if not destinataire and type_courrier != 'plainte_cnil' %}<small>Pas d'adresse connue : cherche « DPO » ou « privacy » sur la page vie privée de {% if c.site %}<a href="{{ c.site }}" target="_blank" rel="noopener noreferrer">leur site</a>{% else %}leur site{% endif %}.</small>{% endif %}
+  <label>Objet<input name="objet" id="objet" value="{{ lettre.objet }}"></label>
+  <label>Texte<textarea name="corps" id="corps" rows="22">{{ lettre.corps }}</textarea></label>
+  <div class="boutons">
+    {% if smtp and type_courrier != 'plainte_cnil' %}
+      <button name="action" value="envoyer">Envoyer par e-mail</button>
+    {% endif %}
+    {% if type_courrier != 'plainte_cnil' %}<a class="bouton" id="mailto" href="#">Ouvrir dans ma messagerie</a>{% endif %}
+    <button type="button" class="secondaire" id="copier">Copier le texte</button>
+    <button name="action" value="marquer" class="secondaire">{{ 'Noter la plainte comme déposée' if type_courrier == 'plainte_cnil' else "Noter comme envoyé" }}</button>
+  </div>
+  {% if not smtp and type_courrier != 'plainte_cnil' %}<small>Pour envoyer directement depuis l'appli, configure le SMTP (voir le README). Sinon, ouvre le courrier dans ta messagerie puis clique « Noter comme envoyé ».</small>{% endif %}
+</form>
+<script>
+(function () {
+  var d = document.getElementById('dest'), o = document.getElementById('objet'), b = document.getElementById('corps');
+  var m = document.getElementById('mailto');
+  function maj() { if (m) m.href = 'mailto:' + encodeURIComponent(d.value) + '?subject=' + encodeURIComponent(o.value) + '&body=' + encodeURIComponent(b.value); }
+  [d, o, b].forEach(function (el) { el.addEventListener('input', maj); }); maj();
+  document.getElementById('copier').addEventListener('click', function () {
+    navigator.clipboard.writeText(o.value + '\n\n' + b.value).then(function () { document.getElementById('copier').textContent = 'Copié ✓'; });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block contenu %}
+{% if profil_incomplet %}<p class="flash">Commence par remplir <a href="{{ url_for('wiper.profil') }}">ton profil</a> (nom et e-mails) : il sert à rédiger les courriers RGPD.</p>{% endif %}
 <section class="stats">
   <div class="stat"><span class="n">{{ fini }}/{{ total }}</span><span>traitées</span>
     <div class="barre"><div style="width: {{ (100 * fini / total) | round | int if total else 0 }}%"></div></div>
@@ -8,6 +9,7 @@
   <a class="stat s-{{ k }}" href="{{ url_for('wiper.index', statut=k) }}"><span class="n">{{ compte[k] }}</span><span>{{ label }}</span></a>
   {% endfor %}
   <a class="stat s-relance" href="{{ url_for('wiper.index', statut='a_relancer') }}"><span class="n">{{ nb_relance }}</span><span>À relancer</span></a>
+  <a class="stat s-cnil" href="{{ url_for('wiper.index', statut='cnil') }}"><span class="n">{{ nb_cnil }}</span><span>Plainte CNIL possible</span></a>
 </section>
 
 <form class="filtres" method="get">
@@ -16,6 +18,7 @@
     <option value="">Tous les statuts</option>
     {% for k, label in STATUTS.items() %}<option value="{{ k }}" {{ 'selected' if filtre.statut == k }}>{{ label }}</option>{% endfor %}
     <option value="a_relancer" {{ 'selected' if filtre.statut == 'a_relancer' }}>À relancer</option>
+    <option value="cnil" {{ 'selected' if filtre.statut == 'cnil' }}>Plainte CNIL possible</option>
   </select>
   <select name="categorie">
     <option value="">Toutes les catégories</option>
@@ -33,9 +36,10 @@
     <tr>
       <td><a href="{{ url_for('wiper.cible', cible_id=c.id) }}">{{ c.nom }}</a>{% if c.pays %} <small>{{ c.pays }}</small>{% endif %}</td>
       <td>{{ c.categorie }}</td>
-      <td>{% if c.optout_url %}<a href="{{ c.optout_url }}" target="_blank" rel="noopener noreferrer">Opt-out ↗</a>{% elif c.site %}<a href="{{ c.site }}" target="_blank" rel="noopener noreferrer">Site ↗</a>{% endif %}
+      <td><a href="{{ url_for('wiper.courrier', cible_id=c.id) }}">Courrier</a> ·
+          {% if c.optout_url %}<a href="{{ c.optout_url }}" target="_blank" rel="noopener noreferrer">Opt-out ↗</a>{% elif c.site %}<a href="{{ c.site }}" target="_blank" rel="noopener noreferrer">Site ↗</a>{% endif %}
           {% if c.methode %}<small>{{ c.methode }}</small>{% endif %}</td>
-      <td><span class="badge s-{{ c.statut }}">{{ STATUTS[c.statut] }}</span>{% if a_relancer(c) %} <span class="badge s-relance">À relancer</span>{% endif %}</td>
+      <td><span class="badge s-{{ c.statut }}">{{ STATUTS[c.statut] }}</span>{% if a_relancer(c) %} <a class="badge s-relance" href="{{ url_for('wiper.courrier', cible_id=c.id, type='relance') }}">À relancer</a>{% endif %}{% if cnil_possible(c) %} <a class="badge s-cnil" href="{{ url_for('wiper.courrier', cible_id=c.id, type='plainte_cnil') }}">Plainte CNIL</a>{% endif %}</td>
       <td>
         <form method="post" action="{{ url_for('wiper.changer_statut', cible_id=c.id) }}" class="rapide">
           <input type="hidden" name="retour" value="{{ request.full_path }}">
