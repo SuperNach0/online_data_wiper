@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block titre %}Pilote automatique{% endblock %}
+{% block tete %}{% if tache.en_cours %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% block contenu %}
+<h1>Pilote automatique</h1>
+
+<section class="bloc etapes">
+  <h2>Avant de commencer</h2>
+  <ol class="verif">
+    <li class="{{ 'ok' if profil_ok }}">{{ '✓' if profil_ok else '○' }} <a href="{{ url_for('wiper.profil') }}">Ton profil</a> : nom et adresses e-mail</li>
+    <li class="{{ 'ok' if envoi_ok }}">{{ '✓' if envoi_ok else '○' }} <a href="{{ url_for('wiper.reglages') }}">Ton e-mail et ton mot de passe d'application</a>, pour envoyer les demandes à ta place</li>
+    <li class="{{ 'ok' if boite_ok }}">{{ '✓' if boite_ok else '○' }} Lecture de ta boîte mail {% if not boite_ok %}(s'active avec le réglage ci-dessus pour Gmail, Outlook, Orange, Free, SFR, La Poste, Yahoo, iCloud){% endif %}</li>
+  </ol>
+</section>
+
+{% if tache.nom %}
+<section class="bloc tache {{ 'en-cours' if tache.en_cours }}">
+  <h2>{{ tache.nom }}{% if tache.en_cours %}…{% endif %}</h2>
+  {% if tache.en_cours %}
+    <div class="barre"><div style="width: {{ (100 * tache.fait / tache.total)|round|int if tache.total else 5 }}%"></div></div>
+    <p class="aide">{{ tache.fait }} / {{ tache.total or '?' }}. Tu peux fermer cet onglet, ça continue.</p>
+  {% else %}<p>{{ tache.message }}</p>{% endif %}
+</section>
+{% endif %}
+
+<form method="post" action="{{ url_for('wiper.auto_lancer') }}">
+<section class="bloc">
+  <h2>1. Data brokers et organismes à contacter</h2>
+  {% if plan_auto %}
+  <p class="aide">Une demande d'accès, d'effacement et d'opposition (RGPD) part à chacun, depuis ta propre adresse, avec une copie dans ta boîte.</p>
+  <ul class="cases">
+    {% for p in plan_auto %}
+    <li><label><input type="checkbox" name="cible" value="{{ p.cible.id }}" checked> <strong>{{ p.cible.nom }}</strong> <small>{{ p.destinataire }} · {{ p.cible.categorie }}</small></label></li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="aide">Toutes les demandes possibles par e-mail sont déjà parties.</p>{% endif %}
+</section>
+
+<section class="bloc">
+  <h2>2. Comptes trouvés dans ta boîte mail</h2>
+  {% if boite_ok %}
+    <p class="aide">{% if dernier_scan %}Dernière analyse : {{ dernier_scan[:10] }}.{% else %}Pas encore analysée.{% endif %}
+      L'appli lit seulement l'expéditeur, la date et l'objet de tes e-mails, sans rien modifier.</p>
+  {% else %}<p class="aide">Disponible une fois ton e-mail réglé.</p>{% endif %}
+  {% if comptes %}
+  <p class="aide">Coche les comptes à <strong>supprimer</strong>. Rien n'est coché d'office : ne coche pas ta banque ou un service que tu utilises encore.</p>
+  <ul class="cases">
+    {% for c in comptes %}
+    <li><label>
+      {% if c.contact %}<input type="checkbox" name="domaine" value="{{ c.d.domaine }}">{% else %}<input type="checkbox" disabled title="Pas de contact connu">{% endif %}
+      <strong>{{ c.nom }}</strong> <small>{{ c.d.domaine }} · {{ c.d.nb }} e-mail(s), {{ c.d.premier or '?' }} → {{ c.d.dernier or '?' }}{% if c.contact %} · {{ c.contact }}{% else %} · pas de contact connu, <a href="{{ url_for('wiper.ajouter', nom=c.d.domaine, site='https://' ~ c.d.domaine, categorie='Compte en ligne') }}">ajouter à la main</a>{% endif %}</small>
+    </label></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+
+<p class="lancer"><button class="gros" {{ 'disabled' if not envoi_ok or tache.en_cours }}>Tout lancer : envoyer les demandes cochées</button>
+{% if not envoi_ok %}<small>Règle d'abord ton e-mail dans les Réglages.</small>{% endif %}</p>
+</form>
+{% if boite_ok %}
+<form method="post" action="{{ url_for('wiper.auto_scanner') }}"><button class="secondaire" {{ 'disabled' if tache.en_cours }}>{{ 'Réanalyser' if dernier_scan else 'Analyser' }} ma boîte mail</button></form>
+{% endif %}
+
+<section class="bloc" id="afaire">
+  <h2>3. À faire par toi</h2>
+  {% set rien = not (afaire.reponses or afaire.cnil or afaire.manuel or afaire.invalides) %}
+  {% if rien %}<p class="aide">Rien pour l'instant.</p>{% endif %}
+  {% if afaire.reponses %}
+    <h3>Réponses reçues à lire ({{ afaire.reponses|length }})</h3>
+    <p class="aide">Souvent une confirmation, parfois une demande de pièce d'identité ou un lien à cliquer.</p>
+    <ul class="liste">{% for c in afaire.reponses %}<li><a href="{{ url_for('wiper.cible', cible_id=c.id) }}">{{ c.nom }}</a> : lis la réponse, puis passe la cible en « Supprimé » ou réponds.</li>{% endfor %}</ul>
+  {% endif %}
+  {% if afaire.cnil %}
+    <h3>Plaintes CNIL prêtes ({{ afaire.cnil|length }})</h3>
+    <ul class="liste">{% for c in afaire.cnil %}<li><a href="{{ url_for('wiper.courrier', cible_id=c.id, type='plainte_cnil') }}">{{ c.nom }}</a> : ni réponse ni action malgré la relance. Le texte est prêt, à coller sur cnil.fr.</li>{% endfor %}</ul>
+  {% endif %}
+  {% if afaire.invalides %}
+    <h3>Adresses qui ont rebondi ({{ afaire.invalides|length }})</h3>
+    <ul class="liste">{% for c in afaire.invalides %}<li><a href="{{ url_for('wiper.courrier', cible_id=c.id) }}">{{ c.nom }}</a> : trouve une autre adresse sur leur page vie privée.</li>{% endfor %}</ul>
+  {% endif %}
+  {% if afaire.manuel %}
+    <h3>Formulaires et réglages en ligne ({{ afaire.manuel|length }})</h3>
+    <p class="aide">Ces sites n'acceptent pas les demandes par e-mail (formulaire avec captcha, réglage dans ton compte). Ouvre le lien, fais la démarche, puis clique « Fait ».</p>
+    <ul class="liste">{% for p in afaire.manuel %}{% set c = p.cible %}<li>
+      <strong>{{ c.nom }}</strong> :
+      {% if c.optout_url %}<a href="{{ c.optout_url }}" target="_blank" rel="noopener noreferrer">ouvrir ↗</a>
+      {% else %}pas d'adresse connue : trouve-la sur {% if c.site %}<a href="{{ c.site }}" target="_blank" rel="noopener noreferrer">leur site</a>{% else %}leur site{% endif %}, puis <a href="{{ url_for('wiper.courrier', cible_id=c.id) }}">envoie le courrier</a>{% endif %}
+      <form method="post" action="{{ url_for('wiper.marquer_fait', cible_id=c.id) }}" class="enligne"><button class="petit-bouton">Fait</button></form>
+    </li>{% endfor %}</ul>
+  {% endif %}
+</section>
+
+<section class="bloc">
+  <h2>Chaque jour, tout seul</h2>
+  <p class="aide">Tant que l'appli est ouverte, une fois par jour elle lit les réponses des organismes et repère les adresses invalides. Elle envoie aussi les relances à 30 jours et revérifie les fuites, si tu as une clé Have I Been Pwned.
+    {% if r.derniere_auto %}Dernier passage : {{ r.derniere_auto[:16].replace('T', ' ') }}.{% endif %}</p>
+  <form method="post" action="{{ url_for('wiper.auto_options') }}" class="options">
+    <label class="case"><input type="checkbox" name="auto_relances" value="1" {{ 'checked' if r.get('auto_relances', '1') == '1' }}> Envoyer les relances automatiquement</label>
+    {% if win_possible %}<label class="case"><input type="checkbox" name="demarrage_windows" value="1" {{ 'checked' if win_actif }}> Lancer l'appli au démarrage de Windows (fenêtre réduite)</label>{% endif %}
+    <button class="secondaire">Enregistrer</button>
+  </form>
+  <form method="post" action="{{ url_for('wiper.auto_maintenant') }}"><button class="secondaire" {{ 'disabled' if tache.en_cours or not boite_ok }}>Vérifier maintenant</button></form>
+  {% if journal %}
+  <h3>Journal</h3>
+  <ul class="historique">{% for j in journal %}<li class="{{ j.niveau }}"><time>{{ j.date[:16].replace('T', ' ') }}</time> {{ j.message }}</li>{% endfor %}</ul>
+  {% endif %}
+</section>
+{% endblock %}

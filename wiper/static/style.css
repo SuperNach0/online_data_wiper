@@ -64,3 +64,12 @@ button[disabled] { opacity: .5; cursor: not-allowed; }
 label.case { flex-direction: row !important; align-items: center; gap: 8px; }
 details summary { cursor: pointer; color: var(--muted); }
 details label { margin-top: 8px; }
+.verif { list-style: none; padding-left: 0; } .verif li { margin: 6px 0; color: var(--muted); } .verif li.ok { color: var(--s-supprime); }
+.cases { list-style: none; padding-left: 0; columns: 2 320px; } .cases li { margin: 4px 0; break-inside: avoid; }
+.cases small { display: inline; }
+button.gros { font-size: 17px; padding: 12px 20px; }
+.lancer { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+form.enligne { display: inline; } .petit-bouton { padding: 2px 10px; font-size: 13px; }
+.historique li.erreur { border-left-color: var(--s-refus); }
+.tache.en-cours { border-color: var(--accent); }
+form.options { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; margin-bottom: 8px; }

@@ -19,6 +19,17 @@ Tes données sont dans `%APPDATA%\OnlineDataWiper` (copie ce dossier pour faire 
 
 Pour une nouvelle version, télécharge le nouvel exe et remplace l'ancien : tes données sont conservées.
 
+## Pilote automatique
+
+L'onglet **Pilote automatique** fait le maximum à ta place :
+
+1. Remplis ton profil et, dans Réglages, ton e-mail + un mot de passe d'application (Gmail, Outlook, Orange, Free, SFR, La Poste, Yahoo, iCloud détectés automatiquement).
+2. **Analyser ma boîte mail** : l'appli lit les en-têtes de tes e-mails (lecture seule) et liste les comptes que tu as créés au fil des années.
+3. **Tout lancer** : les demandes RGPD partent depuis ton adresse vers les data brokers et les comptes que tu as cochés. Les adresses de contact viennent d'un annuaire de ~2 500 organismes (base libre [datarequests.org](https://www.datarequests.org), licence CC0, régénérée par `outils/construire_annuaire.py`).
+4. Ensuite, une fois par jour tant que l'appli est ouverte : lecture des réponses (statut « Réponse reçue »), détection des adresses qui rebondissent, relances à 30 jours, vérification des fuites. Option pour lancer l'appli au démarrage de Windows.
+
+Ce qui reste manuel est regroupé dans **À faire par toi** : formulaires web avec captcha, réglages dans tes comptes Google/Meta/Amazon, réponses qui demandent une pièce d'identité, et dépôt des plaintes CNIL (texte prêt).
+
 ## Lancer depuis le code (développement)
 
 ```bash

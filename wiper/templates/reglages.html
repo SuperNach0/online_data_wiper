@@ -5,9 +5,10 @@
 <p class="aide">Tout est facultatif. Sans réglage, les courriers s'ouvrent dans ta messagerie habituelle et les fuites se vérifient à la main.</p>
 
 <section class="bloc">
-<h2>Envoyer les courriers depuis l'appli</h2>
+<h2>Ton e-mail : envoi des demandes et lecture des réponses</h2>
 {% if env_smtp %}<p class="flash">L'envoi est réglé par des variables d'environnement, qui passent avant cette page.</p>{% endif %}
-<p>Statut : {% if smtp %}<span class="badge s-supprime">prêt</span> envoi depuis {{ smtp.from }}{% else %}<span class="badge s-a_contacter">non configuré</span>{% endif %}</p>
+<p>Lecture de la boîte : {% if imap %}<span class="badge s-supprime">prête</span> {{ imap.host }}{% else %}<span class="badge s-a_contacter">non configurée</span>{% endif %}</p>
+<p>Envoi : {% if smtp %}<span class="badge s-supprime">prêt</span> envoi depuis {{ smtp.from }}{% else %}<span class="badge s-a_contacter">non configuré</span>{% endif %}</p>
 <form method="post" class="ajout">
   <label>Ton adresse e-mail<input name="smtp_user" type="email" value="{{ r.get('smtp_user', '') }}" placeholder="toi@gmail.com"></label>
   <label>Mot de passe d'application
@@ -17,6 +18,7 @@
     <summary>Réglages avancés {% if serveur_auto %}(serveur détecté : {{ serveur_auto[0] }}){% endif %}</summary>
     <label>Serveur SMTP<input name="smtp_host" value="{{ r.get('smtp_host', '') }}" placeholder="détecté automatiquement"></label>
     <label>Port<input name="smtp_port" value="{{ r.get('smtp_port', '') }}" placeholder="587 ou 465"></label>
+    <label>Serveur IMAP (lecture de la boîte)<input name="imap_host" value="{{ r.get('imap_host', '') }}" placeholder="détecté automatiquement"></label>
   </details>
 
   <h2>Vérification automatique des fuites</h2>

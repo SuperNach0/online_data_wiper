@@ -204,7 +204,7 @@ def enregistrer_courrier(c, type_courrier, objet, corps, destinataire, moyen):
         statut_ev, texte = None, "Plainte CNIL déposée"
     else:
         db.execute(
-            "UPDATE cible SET statut = 'envoyee', date_envoi = ?, date_relance = NULL, maj = ? WHERE id = ?",
+            "UPDATE cible SET statut = 'envoyee', date_envoi = ?, date_relance = NULL, contact_invalide = 0, maj = ? WHERE id = ?",
             (now, now, c["id"]),
         )
         statut_ev, texte = "envoyee", "Demande RGPD envoyée"

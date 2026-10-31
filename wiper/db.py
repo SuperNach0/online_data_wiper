@@ -39,6 +39,16 @@ CREATE TABLE IF NOT EXISTS profil (
     date_naissance TEXT, telephone TEXT, pseudos TEXT
 );
 INSERT OR IGNORE INTO profil (id) VALUES (1);
+CREATE TABLE IF NOT EXISTS journal (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT NOT NULL,
+    niveau TEXT NOT NULL,
+    message TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS message_traite (
+    message_id TEXT PRIMARY KEY,
+    date TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS reglage (
     cle TEXT PRIMARY KEY,
     valeur TEXT
@@ -69,7 +79,7 @@ def maintenant():
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(current_app.config["DATABASE"])
+        g.db = sqlite3.connect(current_app.config["DATABASE"], timeout=30)
         g.db.row_factory = sqlite3.Row
         g.db.execute("PRAGMA foreign_keys = ON")
     return g.db
@@ -97,6 +107,12 @@ def charger_seed(db):
             ),
         )
         ajoutees += cur.rowcount
+        if c.get("contact_rgpd"):
+            # contacts ajoutés au catalogue après coup : on complète sans écraser une saisie
+            db.execute(
+                "UPDATE cible SET contact_rgpd = ?, methode = ? WHERE slug = ? AND contact_rgpd IS NULL",
+                (c["contact_rgpd"], c.get("methode"), c["slug"]),
+            )
     db.commit()
     return ajoutees
 
@@ -132,6 +148,8 @@ def migrer(db):
     colonnes = {r["name"] for r in db.execute("PRAGMA table_info(cible)")}
     if "date_relance" not in colonnes:
         db.execute("ALTER TABLE cible ADD COLUMN date_relance TEXT")
+    if "contact_invalide" not in colonnes:
+        db.execute("ALTER TABLE cible ADD COLUMN contact_invalide INTEGER NOT NULL DEFAULT 0")
     if "contenu" not in {r["name"] for r in db.execute("PRAGMA table_info(evenement)")}:
         db.execute("ALTER TABLE evenement ADD COLUMN contenu TEXT")
     db.commit()

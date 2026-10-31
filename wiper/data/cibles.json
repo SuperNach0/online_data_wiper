@@ -1,35 +1,308 @@
 [
-  {"slug": "acxiom", "nom": "Acxiom", "categorie": "Data broker", "pays": "US / UE", "site": "https://www.acxiom.com", "optout_url": "https://isapps.acxiom.com/optout/optout.aspx", "methode": "formulaire + demande RGPD", "notes": "Un des plus gros courtiers mondiaux, présent en France. Faire aussi une demande RGPD art. 15 + 17."},
-  {"slug": "experian-marketing", "nom": "Experian Marketing Services", "categorie": "Data broker", "pays": "UE", "site": "https://www.experian.fr", "methode": "demande RGPD", "notes": "Chercher le contact DPO sur la page vie privée d'Experian France."},
-  {"slug": "epsilon", "nom": "Epsilon (Publicis)", "categorie": "Data broker", "pays": "US / UE", "site": "https://www.epsilon.com", "methode": "formulaire + demande RGPD", "notes": "Page « Privacy » : formulaire de droits pour les résidents UE."},
-  {"slug": "liveramp", "nom": "LiveRamp", "categorie": "Data broker", "pays": "US / UE", "site": "https://liveramp.com", "optout_url": "https://liveramp.com/opt_out/", "methode": "formulaire", "notes": "Graphe d'identité utilisé par de nombreux annonceurs."},
-  {"slug": "equifax", "nom": "Equifax", "categorie": "Data broker", "pays": "US / UE", "site": "https://www.equifax.com", "methode": "demande RGPD", "notes": ""},
-  {"slug": "kantar", "nom": "Kantar", "categorie": "Data broker", "pays": "UE", "site": "https://www.kantar.com", "methode": "demande RGPD", "notes": "Panels et études marketing."},
-  {"slug": "mediapost", "nom": "Mediapost (groupe La Poste)", "categorie": "Data broker", "pays": "FR", "site": "https://www.mediapost.fr", "methode": "demande RGPD", "notes": "Fichiers d'adresses pour le courrier publicitaire."},
-
-  {"slug": "spokeo", "nom": "Spokeo", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.spokeo.com", "optout_url": "https://www.spokeo.com/optout", "methode": "formulaire", "notes": "Surtout utile si tu as vécu ou eu des comptes aux États-Unis."},
-  {"slug": "whitepages", "nom": "Whitepages", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.whitepages.com", "optout_url": "https://www.whitepages.com/suppression-requests", "methode": "formulaire", "notes": ""},
-  {"slug": "beenverified", "nom": "BeenVerified", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.beenverified.com", "optout_url": "https://www.beenverified.com/app/optout/search", "methode": "formulaire", "notes": ""},
-  {"slug": "peopleconnect", "nom": "PeopleConnect (Intelius, TruthFinder…)", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.intelius.com", "optout_url": "https://suppression.peopleconnect.us/login", "methode": "formulaire", "notes": "Une seule demande couvre plusieurs sites du groupe."},
-  {"slug": "radaris", "nom": "Radaris", "categorie": "Recherche de personnes", "pays": "US", "site": "https://radaris.com", "optout_url": "https://radaris.com/control/privacy", "methode": "formulaire", "notes": ""},
-  {"slug": "truepeoplesearch", "nom": "TruePeopleSearch", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.truepeoplesearch.com", "optout_url": "https://www.truepeoplesearch.com/removal", "methode": "formulaire", "notes": ""},
-  {"slug": "fastpeoplesearch", "nom": "FastPeopleSearch", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.fastpeoplesearch.com", "optout_url": "https://www.fastpeoplesearch.com/removal", "methode": "formulaire", "notes": ""},
-  {"slug": "nuwber", "nom": "Nuwber", "categorie": "Recherche de personnes", "pays": "US", "site": "https://nuwber.com", "optout_url": "https://nuwber.com/removal/link", "methode": "formulaire", "notes": ""},
-  {"slug": "thatsthem", "nom": "ThatsThem", "categorie": "Recherche de personnes", "pays": "US", "site": "https://thatsthem.com", "optout_url": "https://thatsthem.com/optout", "methode": "formulaire", "notes": ""},
-  {"slug": "peekyou", "nom": "PeekYou", "categorie": "Recherche de personnes", "pays": "US", "site": "https://www.peekyou.com", "optout_url": "https://www.peekyou.com/about/contact/optout", "methode": "formulaire", "notes": ""},
-
-  {"slug": "criteo", "nom": "Criteo", "categorie": "Publicité / ciblage", "pays": "FR", "site": "https://www.criteo.com", "optout_url": "https://www.criteo.com/privacy/", "methode": "formulaire + demande RGPD", "notes": "Reciblage publicitaire. La CNIL l'a sanctionné en 2023 sur le consentement."},
-  {"slug": "google-ads", "nom": "Google (personnalisation des annonces)", "categorie": "Publicité / ciblage", "pays": "US / UE", "site": "https://myadcenter.google.com", "optout_url": "https://myadcenter.google.com", "methode": "réglage du compte", "notes": "Désactiver la personnalisation, puis l'historique d'activité sur myactivity.google.com."},
-  {"slug": "meta-ads", "nom": "Meta (Facebook / Instagram)", "categorie": "Publicité / ciblage", "pays": "US / UE", "site": "https://accountscenter.facebook.com", "optout_url": "https://accountscenter.facebook.com/ad_preferences", "methode": "réglage du compte", "notes": "Préférences publicitaires + « Activité en dehors des technologies Meta »."},
-  {"slug": "microsoft-ads", "nom": "Microsoft Advertising", "categorie": "Publicité / ciblage", "pays": "US / UE", "site": "https://account.microsoft.com/privacy", "optout_url": "https://account.microsoft.com/privacy/ad-settings", "methode": "réglage du compte", "notes": ""},
-  {"slug": "amazon-ads", "nom": "Amazon (publicités)", "categorie": "Publicité / ciblage", "pays": "US / UE", "site": "https://www.amazon.fr", "optout_url": "https://www.amazon.fr/adprefs", "methode": "réglage du compte", "notes": ""},
-
-  {"slug": "youronlinechoices", "nom": "Your Online Choices (EDAA)", "categorie": "Opt-out collectif", "pays": "UE", "site": "https://www.youronlinechoices.com/fr/", "optout_url": "https://www.youronlinechoices.com/fr/controler-ses-cookies", "methode": "outil en ligne", "notes": "Opt-out par cookie : à refaire sur chaque navigateur et après chaque effacement des cookies."},
-  {"slug": "nai", "nom": "NAI (Network Advertising Initiative)", "categorie": "Opt-out collectif", "pays": "US", "site": "https://thenai.org", "optout_url": "https://optout.networkadvertising.org", "methode": "outil en ligne", "notes": "Même principe, par cookie."},
-  {"slug": "daa", "nom": "DAA WebChoices", "categorie": "Opt-out collectif", "pays": "US", "site": "https://digitaladvertisingalliance.org", "optout_url": "https://optout.aboutads.info", "methode": "outil en ligne", "notes": "Même principe, par cookie."},
-
-  {"slug": "bloctel", "nom": "Bloctel", "categorie": "Démarchage / annuaires FR", "pays": "FR", "site": "https://www.bloctel.gouv.fr", "optout_url": "https://www.bloctel.gouv.fr", "methode": "inscription", "notes": "Liste officielle d'opposition au démarchage téléphonique. Inscription valable 3 ans."},
-  {"slug": "pagesjaunes", "nom": "PagesJaunes / PagesBlanches (Solocal)", "categorie": "Démarchage / annuaires FR", "pays": "FR", "site": "https://www.pagesjaunes.fr", "methode": "demande RGPD", "notes": "Demander la suppression de la fiche et l'inscription en liste anti-prospection."},
-  {"slug": "stop-publicite", "nom": "Liste Robinson / Stop Publicité", "categorie": "Démarchage / annuaires FR", "pays": "FR", "site": "https://www.ufmd.org", "methode": "inscription", "notes": "Opposition à la prospection par courrier. Vérifier l'adresse d'inscription à jour sur le site de l'UFMD."},
-  {"slug": "copainsdavant", "nom": "Copains d'avant", "categorie": "Démarchage / annuaires FR", "pays": "FR", "site": "https://copainsdavant.linternaute.com", "methode": "demande RGPD", "notes": "Fiches parfois créées sans le savoir."}
+  {
+    "slug": "acxiom",
+    "nom": "Acxiom",
+    "categorie": "Data broker",
+    "pays": "US / UE",
+    "site": "https://www.acxiom.com",
+    "optout_url": "https://isapps.acxiom.com/optout/optout.aspx",
+    "methode": "e-mail RGPD",
+    "notes": "Un des plus gros courtiers mondiaux, présent en France. Faire aussi une demande RGPD art. 15 + 17.",
+    "contact_rgpd": "dataprotection@acxiom.com"
+  },
+  {
+    "slug": "experian-marketing",
+    "nom": "Experian Marketing Services",
+    "categorie": "Data broker",
+    "pays": "UE",
+    "site": "https://www.experian.fr",
+    "methode": "demande RGPD",
+    "notes": "Chercher le contact DPO sur la page vie privée d'Experian France."
+  },
+  {
+    "slug": "epsilon",
+    "nom": "Epsilon (Publicis)",
+    "categorie": "Data broker",
+    "pays": "US / UE",
+    "site": "https://www.epsilon.com",
+    "methode": "e-mail RGPD",
+    "notes": "Page « Privacy » : formulaire de droits pour les résidents UE.",
+    "contact_rgpd": "privacy@epsilon.com"
+  },
+  {
+    "slug": "liveramp",
+    "nom": "LiveRamp",
+    "categorie": "Data broker",
+    "pays": "US / UE",
+    "site": "https://liveramp.com",
+    "optout_url": "https://liveramp.com/opt_out/",
+    "methode": "e-mail RGPD",
+    "notes": "Graphe d'identité utilisé par de nombreux annonceurs.",
+    "contact_rgpd": "cil@liveramp.com"
+  },
+  {
+    "slug": "equifax",
+    "nom": "Equifax",
+    "categorie": "Data broker",
+    "pays": "US / UE",
+    "site": "https://www.equifax.com",
+    "methode": "demande RGPD",
+    "notes": ""
+  },
+  {
+    "slug": "kantar",
+    "nom": "Kantar",
+    "categorie": "Data broker",
+    "pays": "UE",
+    "site": "https://www.kantar.com",
+    "methode": "demande RGPD",
+    "notes": "Panels et études marketing."
+  },
+  {
+    "slug": "mediapost",
+    "nom": "Mediapost (groupe La Poste)",
+    "categorie": "Data broker",
+    "pays": "FR",
+    "site": "https://www.mediapost.fr",
+    "methode": "demande RGPD",
+    "notes": "Fichiers d'adresses pour le courrier publicitaire."
+  },
+  {
+    "slug": "sls-data",
+    "nom": "SLS Data",
+    "categorie": "Data broker",
+    "pays": "FR",
+    "site": "https://www.sls-data.com",
+    "contact_rgpd": "dpo@sls-data.com",
+    "methode": "e-mail RGPD",
+    "notes": "Fichiers de prospection. Contact issu de datarequests.org."
+  },
+  {
+    "slug": "gfk",
+    "nom": "GfK",
+    "categorie": "Data broker",
+    "pays": "UE",
+    "site": "https://www.gfk.com",
+    "contact_rgpd": "dpo@gfk.com",
+    "methode": "e-mail RGPD",
+    "notes": "Études de marché et panels. Contact issu de datarequests.org."
+  },
+  {
+    "slug": "spokeo",
+    "nom": "Spokeo",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.spokeo.com",
+    "optout_url": "https://www.spokeo.com/optout",
+    "methode": "formulaire",
+    "notes": "Surtout utile si tu as vécu ou eu des comptes aux États-Unis."
+  },
+  {
+    "slug": "whitepages",
+    "nom": "Whitepages",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.whitepages.com",
+    "optout_url": "https://www.whitepages.com/suppression-requests",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "beenverified",
+    "nom": "BeenVerified",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.beenverified.com",
+    "optout_url": "https://www.beenverified.com/app/optout/search",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "peopleconnect",
+    "nom": "PeopleConnect (Intelius, TruthFinder…)",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.intelius.com",
+    "optout_url": "https://suppression.peopleconnect.us/login",
+    "methode": "formulaire",
+    "notes": "Une seule demande couvre plusieurs sites du groupe."
+  },
+  {
+    "slug": "radaris",
+    "nom": "Radaris",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://radaris.com",
+    "optout_url": "https://radaris.com/control/privacy",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "truepeoplesearch",
+    "nom": "TruePeopleSearch",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.truepeoplesearch.com",
+    "optout_url": "https://www.truepeoplesearch.com/removal",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "fastpeoplesearch",
+    "nom": "FastPeopleSearch",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.fastpeoplesearch.com",
+    "optout_url": "https://www.fastpeoplesearch.com/removal",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "nuwber",
+    "nom": "Nuwber",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://nuwber.com",
+    "optout_url": "https://nuwber.com/removal/link",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "thatsthem",
+    "nom": "ThatsThem",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://thatsthem.com",
+    "optout_url": "https://thatsthem.com/optout",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "peekyou",
+    "nom": "PeekYou",
+    "categorie": "Recherche de personnes",
+    "pays": "US",
+    "site": "https://www.peekyou.com",
+    "optout_url": "https://www.peekyou.com/about/contact/optout",
+    "methode": "formulaire",
+    "notes": ""
+  },
+  {
+    "slug": "criteo",
+    "nom": "Criteo",
+    "categorie": "Publicité / ciblage",
+    "pays": "FR",
+    "site": "https://www.criteo.com",
+    "optout_url": "https://www.criteo.com/privacy/",
+    "methode": "e-mail RGPD",
+    "notes": "Reciblage publicitaire. La CNIL l'a sanctionné en 2023 sur le consentement.",
+    "contact_rgpd": "dpo@criteo.com"
+  },
+  {
+    "slug": "google-ads",
+    "nom": "Google (personnalisation des annonces)",
+    "categorie": "Publicité / ciblage",
+    "pays": "US / UE",
+    "site": "https://myadcenter.google.com",
+    "optout_url": "https://myadcenter.google.com",
+    "methode": "réglage du compte",
+    "notes": "Désactiver la personnalisation, puis l'historique d'activité sur myactivity.google.com."
+  },
+  {
+    "slug": "meta-ads",
+    "nom": "Meta (Facebook / Instagram)",
+    "categorie": "Publicité / ciblage",
+    "pays": "US / UE",
+    "site": "https://accountscenter.facebook.com",
+    "optout_url": "https://accountscenter.facebook.com/ad_preferences",
+    "methode": "réglage du compte",
+    "notes": "Préférences publicitaires + « Activité en dehors des technologies Meta »."
+  },
+  {
+    "slug": "microsoft-ads",
+    "nom": "Microsoft Advertising",
+    "categorie": "Publicité / ciblage",
+    "pays": "US / UE",
+    "site": "https://account.microsoft.com/privacy",
+    "optout_url": "https://account.microsoft.com/privacy/ad-settings",
+    "methode": "réglage du compte",
+    "notes": ""
+  },
+  {
+    "slug": "amazon-ads",
+    "nom": "Amazon (publicités)",
+    "categorie": "Publicité / ciblage",
+    "pays": "US / UE",
+    "site": "https://www.amazon.fr",
+    "optout_url": "https://www.amazon.fr/adprefs",
+    "methode": "réglage du compte",
+    "notes": ""
+  },
+  {
+    "slug": "youronlinechoices",
+    "nom": "Your Online Choices (EDAA)",
+    "categorie": "Opt-out collectif",
+    "pays": "UE",
+    "site": "https://www.youronlinechoices.com/fr/",
+    "optout_url": "https://www.youronlinechoices.com/fr/controler-ses-cookies",
+    "methode": "outil en ligne",
+    "notes": "Opt-out par cookie : à refaire sur chaque navigateur et après chaque effacement des cookies."
+  },
+  {
+    "slug": "nai",
+    "nom": "NAI (Network Advertising Initiative)",
+    "categorie": "Opt-out collectif",
+    "pays": "US",
+    "site": "https://thenai.org",
+    "optout_url": "https://optout.networkadvertising.org",
+    "methode": "outil en ligne",
+    "notes": "Même principe, par cookie."
+  },
+  {
+    "slug": "daa",
+    "nom": "DAA WebChoices",
+    "categorie": "Opt-out collectif",
+    "pays": "US",
+    "site": "https://digitaladvertisingalliance.org",
+    "optout_url": "https://optout.aboutads.info",
+    "methode": "outil en ligne",
+    "notes": "Même principe, par cookie."
+  },
+  {
+    "slug": "bloctel",
+    "nom": "Bloctel",
+    "categorie": "Démarchage / annuaires FR",
+    "pays": "FR",
+    "site": "https://www.bloctel.gouv.fr",
+    "optout_url": "https://www.bloctel.gouv.fr",
+    "methode": "inscription",
+    "notes": "Liste officielle d'opposition au démarchage téléphonique. Inscription valable 3 ans."
+  },
+  {
+    "slug": "pagesjaunes",
+    "nom": "PagesJaunes / PagesBlanches (Solocal)",
+    "categorie": "Démarchage / annuaires FR",
+    "pays": "FR",
+    "site": "https://www.pagesjaunes.fr",
+    "methode": "demande RGPD",
+    "notes": "Demander la suppression de la fiche et l'inscription en liste anti-prospection."
+  },
+  {
+    "slug": "stop-publicite",
+    "nom": "Liste Robinson / Stop Publicité",
+    "categorie": "Démarchage / annuaires FR",
+    "pays": "FR",
+    "site": "https://www.ufmd.org",
+    "methode": "inscription",
+    "notes": "Opposition à la prospection par courrier. Vérifier l'adresse d'inscription à jour sur le site de l'UFMD."
+  },
+  {
+    "slug": "copainsdavant",
+    "nom": "Copains d'avant",
+    "categorie": "Démarchage / annuaires FR",
+    "pays": "FR",
+    "site": "https://copainsdavant.linternaute.com",
+    "methode": "demande RGPD",
+    "notes": "Fiches parfois créées sans le savoir."
+  }
 ]
