@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block titre %}Bilan{% endblock %}
+{% block contenu %}
+<div class="entete-bilan">
+  <div>
+    <h1>Bilan de mes démarches</h1>
+    <p class="aide">{% if p.prenom or p.nom %}{{ p.prenom or '' }} {{ p.nom or '' }} · {% endif %}au {{ aujourdhui }}{% if premiere %} · première démarche le {{ premiere[:10] }}{% endif %}</p>
+  </div>
+  <div class="boutons pas-imprime">
+    <button type="button" class="secondaire" onclick="window.print()">Imprimer / PDF</button>
+    <a class="bouton" href="{{ url_for('wiper.bilan_csv') }}">Exporter (CSV)</a>
+  </div>
+</div>
+
+<section class="stats">
+  <div class="stat"><span class="n">{{ fini }}/{{ total }}</span><span>organismes traités</span>
+    <div class="barre"><div style="width: {{ (100 * fini / total)|round|int if total else 0 }}%"></div></div></div>
+  <div class="stat"><span class="n">{{ chiffres.contactes }}</span><span>organismes contactés</span></div>
+  <div class="stat s-envoyee"><span class="n">{{ chiffres.demandes }}</span><span>demandes RGPD envoyées</span></div>
+  <div class="stat s-relance"><span class="n">{{ chiffres.relances }}</span><span>relances</span></div>
+  <div class="stat s-reponse"><span class="n">{{ chiffres.reponses }}</span><span>réponses reçues</span></div>
+  <div class="stat s-supprime"><span class="n">{{ chiffres.supprimes }}</span><span>suppressions confirmées</span></div>
+  <div class="stat"><span class="n">{{ chiffres.manuels }}</span><span>démarches faites à la main</span></div>
+  <div class="stat s-cnil"><span class="n">{{ chiffres.plaintes }}</span><span>plaintes CNIL</span></div>
+  <div class="stat"><span class="n">{{ chiffres.comptes }}</span><span>comptes trouvés dans ta boîte</span></div>
+  <div class="stat"><span class="n">{{ chiffres.fuites }}</span><span>fuites de données</span></div>
+</section>
+
+<section class="bloc">
+  <h2>Avancement par catégorie</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Catégorie</th><th>Organismes</th><th>Contactés</th><th>Terminés</th><th>Avancement</th></tr></thead>
+    <tbody>{% for cat in categories %}
+      <tr><td>{{ cat.categorie }}</td><td>{{ cat.total }}</td><td>{{ cat.contactes }}</td><td>{{ cat.finis }}</td>
+        <td class="col-barre"><div class="barre"><div style="width: {{ (100 * cat.finis / cat.total)|round|int }}%"></div></div></td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</section>
+
+{% if attente %}
+<section class="bloc">
+  <h2>En attente de réponse ({{ attente|length }})</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Organisme</th><th>Demande envoyée le</th><th>Depuis</th><th>Prochaine étape</th></tr></thead>
+    <tbody>{% for a in attente %}
+      <tr><td><a href="{{ url_for('wiper.cible', cible_id=a.c.id) }}">{{ a.c.nom }}</a></td>
+        <td>{{ a.c.date_envoi[:10] if a.c.date_envoi else '?' }}</td>
+        <td>{{ a.jours if a.jours is not none else '?' }} j</td>
+        <td>{% if cnil_possible(a.c) %}<span class="badge s-cnil">plainte CNIL possible</span>
+            {% elif a.c.date_relance %}relancé le {{ a.c.date_relance[:10] }}
+            {% elif a_relancer(a.c) %}<span class="badge s-relance">à relancer</span>
+            {% else %}délai légal en cours (1 mois){% endif %}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</section>
+{% endif %}
+
+<section class="bloc">
+  <h2>Historique complet ({{ historique|length }})</h2>
+  {% if historique %}
+  <div class="table-wrap"><table>
+    <thead><tr><th>Date</th><th>Organisme</th><th>Action</th></tr></thead>
+    <tbody>{% for h in historique %}
+      <tr><td class="date">{{ h.date[:16].replace('T', ' ') }}</td>
+        <td><a href="{{ url_for('wiper.cible', cible_id=h.cible_id) }}">{{ h.nom }}</a><small>{{ h.categorie }}</small></td>
+        <td>{% if h.statut %}<span class="badge s-{{ h.statut }}">{{ STATUTS[h.statut] }}</span> {% endif %}{{ h.note or '' }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="aide">Aucune démarche pour l'instant. Commence par le <a href="{{ url_for('wiper.pilote') }}">Pilote automatique</a>.</p>{% endif %}
+</section>
+{% endblock %}
